@@ -13,8 +13,9 @@ import { DownloadStackedButton } from "./DownloadStackedButton";
 import { DownloadFacetsButton } from "./DownloadFacetsButton";
 import { StravaAttribution } from "./StravaAttribution";
 import { RouteFacets } from "./RouteFacets";
+import { PaceChart } from "./PaceChart";
 
-type View = "heatmap" | "routes";
+type View = "heatmap" | "routes" | "insights";
 
 export interface Activity {
   id: number;
@@ -274,30 +275,36 @@ export function Dashboard({ athleteName }: Props) {
           marginBottom: "1rem",
         }}
       >
-        {(["heatmap", "routes"] as const).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            style={{
-              padding: "0.4rem 1rem",
-              border: `1px solid ${view === v ? "var(--orange-5)" : "var(--border)"}`,
-              borderRadius: "8px",
-              background: view === v ? "var(--orange-5)" : "transparent",
-              color: view === v ? "#000" : "var(--text-muted)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.72rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.15s",
-              textTransform: "capitalize",
-            }}
-          >
-            {v === "heatmap" ? "Heatmap" : "Routes"}
-          </button>
-        ))}
+        {(["heatmap", "routes", "insights"] as const).map((v) => {
+          const labels: Record<View, string> = {
+            heatmap: "Heatmap",
+            routes: "Routes",
+            insights: "Insights",
+          };
+          return (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              style={{
+                padding: "0.4rem 1rem",
+                border: `1px solid ${view === v ? "var(--orange-5)" : "var(--border)"}`,
+                borderRadius: "8px",
+                background: view === v ? "var(--orange-5)" : "transparent",
+                color: view === v ? "#000" : "var(--text-muted)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              {labels[v]}
+            </button>
+          );
+        })}
       </div>
 
-      {view === "heatmap" ? (
+      {view === "heatmap" && (
         <>
           {/* Heatmap */}
           <div
@@ -349,7 +356,6 @@ export function Dashboard({ athleteName }: Props) {
                     dateMap={dateMap}
                     excluded={excludedYears}
                     onToggleYear={(y) => {
-                      // Don't allow excluding all years
                       const visibleCount = sortedYears.filter((yr) => !excludedYears.has(yr)).length;
                       if (!excludedYears.has(y) && visibleCount <= 1) return;
                       toggleExcludedYear(y);
@@ -363,8 +369,9 @@ export function Dashboard({ athleteName }: Props) {
           {/* Recent Runs */}
           <RecentRuns activities={filteredActivities} />
         </>
-      ) : (
-        /* Route Facets */
+      )}
+
+      {view === "routes" && (
         <div
           style={{
             background: "var(--surface)",
@@ -392,6 +399,36 @@ export function Dashboard({ athleteName }: Props) {
             />
           </div>
           <RouteFacets activities={activities} />
+        </div>
+      )}
+
+      {view === "insights" && (
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "18px",
+            padding: "2rem",
+            marginBottom: "2rem",
+            animation: "slideUp 0.5s ease 0.25s both",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1.5rem",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
+              Pace vs Distance
+            </h2>
+            <YearSelector years={sortedYears} mode={mode} onSelect={setMode} />
+          </div>
+          <PaceChart activities={filteredActivities} />
         </div>
       )}
 
