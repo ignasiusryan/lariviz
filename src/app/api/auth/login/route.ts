@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clientId = process.env.STRAVA_CLIENT_ID;
-  const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const redirectUri = `${baseUrl}/api/auth/callback`;
+  const origin = request.nextUrl.origin;
+  const redirectUri = `${origin}/api/auth/callback`;
 
   const url = new URL("https://www.strava.com/oauth/authorize");
   url.searchParams.set("client_id", clientId!);

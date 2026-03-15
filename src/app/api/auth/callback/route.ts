@@ -3,10 +3,10 @@ import { setSession } from "@/lib/session";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
-  const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const origin = request.nextUrl.origin;
 
   if (!code) {
-    return NextResponse.redirect(`${baseUrl}/?error=no_code`);
+    return NextResponse.redirect(`${origin}/?error=no_code`);
   }
 
   const tokenRes = await fetch("https://www.strava.com/oauth/token", {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (!tokenRes.ok) {
-    return NextResponse.redirect(`${baseUrl}/?error=token_exchange_failed`);
+    return NextResponse.redirect(`${origin}/?error=token_exchange_failed`);
   }
 
   const data = await tokenRes.json();
@@ -34,5 +34,5 @@ export async function GET(request: NextRequest) {
     athlete_name: `${data.athlete.firstname || ""} ${data.athlete.lastname || ""}`.trim(),
   });
 
-  return NextResponse.redirect(baseUrl);
+  return NextResponse.redirect(origin);
 }
