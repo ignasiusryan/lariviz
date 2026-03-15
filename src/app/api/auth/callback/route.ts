@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setSession } from "@/lib/session";
+import { encrypt } from "@/lib/crypto";
+
+const COOKIE_NAME = "strava_session";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -26,13 +28,22 @@ export async function GET(request: NextRequest) {
 
   const data = await tokenRes.json();
 
-  await setSession({
+  const session = {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
     expires_at: data.expires_at,
     athlete_id: data.athlete.id,
     athlete_name: `${data.athlete.firstname || ""} ${data.athlete.lastname || ""}`.trim(),
+  };
+
+  const response = NextResponse.redirect(origin);
+  response.cookies.set(COOKIE_NAME, encrypt(JSON.stringify(session)), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
   });
 
-  return NextResponse.redirect(origin);
+  return response;
 }

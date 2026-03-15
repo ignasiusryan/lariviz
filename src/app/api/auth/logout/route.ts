@@ -1,8 +1,16 @@
-import { NextResponse } from "next/server";
-import { clearSession } from "@/lib/session";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
-  await clearSession();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  return NextResponse.redirect(baseUrl, { status: 303 });
+const COOKIE_NAME = "strava_session";
+
+export async function POST(request: NextRequest) {
+  const origin = request.nextUrl.origin;
+  const response = NextResponse.redirect(origin, { status: 303 });
+  response.cookies.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
 }
