@@ -128,6 +128,7 @@ body::before {
     padding: 1.25rem !important;
     border-radius: 14px !important;
     margin-bottom: 1.25rem !important;
+    overflow: hidden !important;
   }
 
   .card-section h2 {
@@ -177,12 +178,14 @@ body::before {
   }
 
   .heatmap-scroll {
-    overflow-x: auto;
+    overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
+    max-width: 100% !important;
   }
 
   .recent-runs-card {
     padding: 1.25rem !important;
+    overflow: hidden !important;
   }
 
   .run-row {
