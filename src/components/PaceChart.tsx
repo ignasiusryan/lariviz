@@ -394,9 +394,9 @@ export function PaceChart({
                 onClick={() => setMaxDistFilter(d)}
                 style={{
                   padding: "0.25rem 0.5rem",
-                  border: `1px solid ${isActive ? "var(--orange-4)" : "var(--border)"}`,
+                  border: `1px solid ${isActive ? "var(--orange-3)" : "var(--border)"}`,
                   borderRadius: "6px",
-                  background: isActive ? "var(--orange-1)" : "transparent",
+                  background: isActive ? "linear-gradient(135deg, var(--surface), var(--orange-1))" : "transparent",
                   color: isActive ? "var(--orange-5)" : "var(--text-dim)",
                   fontFamily: "var(--font-mono)",
                   fontSize: "0.65rem",

@@ -116,10 +116,10 @@ export function RouteFacets({ activities }: Props) {
               onClick={() => setSort(s)}
               style={{
                 padding: "0.3rem 0.6rem",
-                border: `1px solid ${sort === s ? "var(--orange-5)" : "var(--border)"}`,
+                border: `1px solid ${sort === s ? "var(--orange-3)" : "var(--border)"}`,
                 borderRadius: "6px",
-                background: sort === s ? "var(--orange-5)" : "transparent",
-                color: sort === s ? "#000" : "var(--text-muted)",
+                background: sort === s ? "linear-gradient(135deg, var(--surface), var(--orange-1))" : "transparent",
+                color: sort === s ? "var(--orange-5)" : "var(--text-muted)",
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.65rem",
                 cursor: "pointer",

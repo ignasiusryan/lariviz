@@ -22,9 +22,9 @@ const btnBase: React.CSSProperties = {
 
 const btnActive: React.CSSProperties = {
   ...btnBase,
-  background: "var(--orange-5)",
-  color: "#000",
-  borderColor: "var(--orange-5)",
+  background: "linear-gradient(135deg, var(--surface), var(--orange-1))",
+  color: "var(--orange-5)",
+  borderColor: "var(--orange-3)",
 };
 
 export function YearSelector({ years, mode, onSelect }: Props) {

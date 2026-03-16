@@ -14,10 +14,11 @@ type SplitMode = "all" | "weekday" | "weekend";
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function hourLabel(h: number): string {
-  if (h === 0) return "12a";
-  if (h < 12) return `${h}a`;
-  if (h === 12) return "12p";
-  return `${h - 12}p`;
+  return `${h.toString().padStart(2, "0")}:00`;
+}
+
+function hourLabelShort(h: number): string {
+  return h.toString().padStart(2, "0");
 }
 
 function getHourCounts(activities: Activity[]): number[] {
@@ -72,10 +73,10 @@ export function RunTimesChart({ activities }: Props) {
   const maxCount = Math.max(1, ...datasets.flatMap((d) => d.counts));
 
   // SVG dimensions
-  const size = 420;
+  const size = 460;
   const cx = size / 2;
   const cy = size / 2;
-  const outerR = size / 2 - 40;
+  const outerR = size / 2 - 50;
   const innerR = outerR * 0.3;
   const barMaxR = outerR - innerR;
 
@@ -208,11 +209,12 @@ export function RunTimesChart({ activities }: Props) {
         ctx.lineTo(tickEnd.x, tickEnd.y);
         ctx.stroke();
 
-        if (h % 3 === 0) {
-          const labelPos = cPolar(angle, clockOuterR + 14 * S);
-          ctx.fillStyle = c.textMuted;
-          ctx.fillText(hourLabel(h), labelPos.x, labelPos.y);
-        }
+        const labelPos = cPolar(angle, clockOuterR + 14 * S);
+        ctx.fillStyle = h % 6 === 0 ? c.textMuted : c.textDim;
+        ctx.font = h % 6 === 0
+          ? `600 ${8 * S}px 'JetBrains Mono', monospace`
+          : `400 ${6.5 * S}px 'JetBrains Mono', monospace`;
+        ctx.fillText(hourLabelShort(h), labelPos.x, labelPos.y);
       }
 
       // Bars
@@ -309,9 +311,9 @@ export function RunTimesChart({ activities }: Props) {
                 }
                 style={{
                   padding: "0.25rem 0.5rem",
-                  border: `1px solid ${isActive ? "var(--orange-4)" : "var(--border)"}`,
+                  border: `1px solid ${isActive ? "var(--orange-3)" : "var(--border)"}`,
                   borderRadius: "6px",
-                  background: isActive ? "var(--orange-1)" : "transparent",
+                  background: isActive ? "linear-gradient(135deg, var(--surface), var(--orange-1))" : "transparent",
                   color: isActive ? "var(--orange-5)" : "var(--text-dim)",
                   fontFamily: "var(--font-mono)",
                   fontSize: "0.65rem",
@@ -367,7 +369,7 @@ export function RunTimesChart({ activities }: Props) {
       >
         <svg
           viewBox={`0 0 ${size} ${size}`}
-          style={{ width: "100%", maxWidth: 420, height: "auto" }}
+          style={{ width: "100%", maxWidth: 460, height: "auto" }}
         >
           {/* Concentric guide rings */}
           {[0.25, 0.5, 0.75, 1].map((ring) => {
@@ -391,8 +393,7 @@ export function RunTimesChart({ activities }: Props) {
             const angle = (h / 24) * 2 * Math.PI;
             const tickStart = polarToXY(angle, innerR - 4);
             const tickEnd = polarToXY(angle, innerR);
-            const labelPos = polarToXY(angle, outerR + 16);
-            const showLabel = h % 3 === 0;
+            const labelPos = polarToXY(angle, outerR + 14);
 
             return (
               <g key={h}>
@@ -404,19 +405,18 @@ export function RunTimesChart({ activities }: Props) {
                   stroke="var(--border)"
                   strokeWidth={0.5}
                 />
-                {showLabel && (
-                  <text
-                    x={labelPos.x}
-                    y={labelPos.y}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill="var(--text-muted)"
-                    fontSize={10}
-                    fontFamily="var(--font-mono)"
-                  >
-                    {hourLabel(h)}
-                  </text>
-                )}
+                <text
+                  x={labelPos.x}
+                  y={labelPos.y}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fill={h % 6 === 0 ? "var(--text-muted)" : "var(--text-dim)"}
+                  fontSize={h % 6 === 0 ? 9 : 7.5}
+                  fontWeight={h % 6 === 0 ? 600 : 400}
+                  fontFamily="var(--font-mono)"
+                >
+                  {hourLabelShort(h)}
+                </text>
               </g>
             );
           })}

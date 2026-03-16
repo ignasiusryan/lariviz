@@ -289,10 +289,10 @@ export function Dashboard({ athleteName }: Props) {
               onClick={() => setView(v)}
               style={{
                 padding: "0.4rem 1rem",
-                border: `1px solid ${view === v ? "var(--orange-5)" : "var(--border)"}`,
+                border: `1px solid ${view === v ? "var(--orange-3)" : "var(--border)"}`,
                 borderRadius: "8px",
-                background: view === v ? "var(--orange-5)" : "transparent",
-                color: view === v ? "#000" : "var(--text-muted)",
+                background: view === v ? "linear-gradient(135deg, var(--surface), var(--orange-1))" : "transparent",
+                color: view === v ? "var(--orange-5)" : "var(--text-muted)",
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.72rem",
                 fontWeight: 600,
