@@ -16,33 +16,33 @@ export function Heatmap({ data }: Props) {
 
   return (
     <>
-      {/* Month labels */}
-      <div
-        style={{
-          position: "relative",
-          height: 16,
-          marginLeft: 36,
-          marginBottom: 6,
-          width: data.weeks.length * weekWidth,
-        }}
-      >
-        {data.months.map((m, i) => (
-          <span
-            key={i}
-            style={{
-              position: "absolute",
-              left: m.weekIndex * weekWidth,
-              fontSize: "0.6rem",
-              color: "var(--text-muted)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            {m.label}
-          </span>
-        ))}
-      </div>
-
       <div className="heatmap-scroll" style={{ overflowX: "auto", paddingBottom: "0.5rem" }}>
+        {/* Month labels */}
+        <div
+          style={{
+            position: "relative",
+            height: 16,
+            marginLeft: 36,
+            marginBottom: 6,
+            width: data.weeks.length * weekWidth,
+          }}
+        >
+          {data.months.map((m, i) => (
+            <span
+              key={i}
+              style={{
+                position: "absolute",
+                left: m.weekIndex * weekWidth,
+                fontSize: "0.6rem",
+                color: "var(--text-muted)",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {m.label}
+            </span>
+          ))}
+        </div>
+
         <div style={{ display: "inline-flex", gap: 0, alignItems: "flex-start" }}>
           {/* Day labels */}
           <div

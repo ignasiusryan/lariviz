@@ -80,33 +80,33 @@ export function StackedHeatmap({ years, dateMap, excluded, onToggleYear }: Props
             {year}
           </div>
 
-          {/* Month labels per year */}
-          <div
-            style={{
-              position: "relative",
-              height: 16,
-              marginLeft: 36,
-              marginBottom: 4,
-              width: data.weeks.length * step,
-            }}
-          >
-            {data.months.map((m, i) => (
-              <span
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: m.weekIndex * step,
-                  fontSize: "0.6rem",
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
-
           <div className="heatmap-scroll" style={{ overflowX: "auto", paddingBottom: "0.25rem" }}>
+            {/* Month labels per year */}
+            <div
+              style={{
+                position: "relative",
+                height: 16,
+                marginLeft: 36,
+                marginBottom: 4,
+                width: data.weeks.length * step,
+              }}
+            >
+              {data.months.map((m, i) => (
+                <span
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: m.weekIndex * step,
+                    fontSize: "0.6rem",
+                    color: "var(--text-muted)",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  {m.label}
+                </span>
+              ))}
+            </div>
+
             <div
               style={{
                 display: "inline-flex",
