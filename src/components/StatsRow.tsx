@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDuration, formatPace } from "@/lib/format";
+import { formatDuration, formatPace, formatNumber } from "@/lib/format";
 import type { Activity } from "./Dashboard";
 
 interface Props {
@@ -14,8 +14,8 @@ export function StatsRow({ activities }: Props) {
   const avgPace = totalKm > 0 ? totalTime / 60 / totalKm : 0;
 
   const stats = [
-    { label: "Total Runs", value: String(totalRuns), unit: "", highlight: false },
-    { label: "Distance", value: totalKm.toFixed(1), unit: "km", highlight: true },
+    { label: "Total Runs", value: formatNumber(totalRuns), unit: "", highlight: false },
+    { label: "Distance", value: formatNumber(totalKm, 1), unit: "km", highlight: true },
     { label: "Time", value: formatDuration(totalTime), unit: "", highlight: false },
     {
       label: "Avg Pace",

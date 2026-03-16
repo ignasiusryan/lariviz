@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTheme } from "./ThemeProvider";
 import type { HeatmapData } from "@/lib/heatmap";
-import { formatDuration, formatPace } from "@/lib/format";
+import { formatDuration, formatPace, formatNumber } from "@/lib/format";
 import { DARK, LIGHT, getLevelColor, downloadCanvas, downloadBtnStyle } from "@/lib/download-theme";
 import type { Activity } from "./Dashboard";
 
@@ -107,8 +107,8 @@ export function DownloadButton({ heatmapData, activities, athleteName, filename 
       }
 
       const cards: StatCard[] = [
-        { label: "TOTAL RUNS", value: String(totalRuns), unit: "runs" },
-        { label: "DISTANCE", value: totalKm.toFixed(1), unit: "km", highlight: true },
+        { label: "TOTAL RUNS", value: formatNumber(totalRuns), unit: "runs" },
+        { label: "DISTANCE", value: formatNumber(totalKm, 1), unit: "km", highlight: true },
         { label: "TIME", value: formatDuration(totalTime), unit: "" },
         {
           label: "AVG PACE",
@@ -118,7 +118,7 @@ export function DownloadButton({ heatmapData, activities, athleteName, filename 
       ];
 
       if (longest) {
-        const lkm = (longest.distance / 1000).toFixed(1);
+        const lkm = formatNumber(longest.distance / 1000, 1);
         const lpace =
           longest.distance > 0
             ? formatPace((longest.moving_time / 60) / (longest.distance / 1000))

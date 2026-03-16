@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDuration, formatPace } from "@/lib/format";
+import { formatDuration, formatPace, formatNumber } from "@/lib/format";
 import type { Activity } from "./Dashboard";
 
 interface Props {
@@ -41,7 +41,7 @@ export function RecentRuns({ activities }: Props) {
             month: "short",
             day: "numeric",
           });
-          const km = (r.distance / 1000).toFixed(2);
+          const km = formatNumber(r.distance / 1000, 2);
           const pace =
             r.distance > 0
               ? formatPace(r.moving_time / 60 / (r.distance / 1000))
