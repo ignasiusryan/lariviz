@@ -14,8 +14,9 @@ import { DownloadFacetsButton } from "./DownloadFacetsButton";
 import { StravaAttribution } from "./StravaAttribution";
 import { RouteFacets } from "./RouteFacets";
 import { PaceChart } from "./PaceChart";
+import { RunTimesChart } from "./RunTimesChart";
 
-type View = "heatmap" | "routes" | "insights";
+type View = "heatmap" | "routes" | "insights" | "times";
 
 export interface Activity {
   id: number;
@@ -275,11 +276,12 @@ export function Dashboard({ athleteName }: Props) {
           marginBottom: "1rem",
         }}
       >
-        {(["heatmap", "routes", "insights"] as const).map((v) => {
+        {(["heatmap", "routes", "insights", "times"] as const).map((v) => {
           const labels: Record<View, string> = {
             heatmap: "Heatmap",
             routes: "Routes",
             insights: "Insights",
+            times: "Run Times",
           };
           return (
             <button
@@ -433,6 +435,36 @@ export function Dashboard({ athleteName }: Props) {
             allActivities={activities}
             showYearComparison={mode.type === "all"}
           />
+        </div>
+      )}
+
+      {view === "times" && (
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "18px",
+            padding: "2rem",
+            marginBottom: "2rem",
+            animation: "slideUp 0.5s ease 0.25s both",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1.5rem",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
+              Run Times
+            </h2>
+            <YearSelector years={sortedYears} mode={mode} onSelect={setMode} />
+          </div>
+          <RunTimesChart activities={filteredActivities} />
         </div>
       )}
 
