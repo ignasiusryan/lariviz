@@ -42,7 +42,7 @@ function buildConfig(
     routePoints = decodePolyline(activity.map.summary_polyline);
   }
 
-  // Convert literal \n to real newlines for poetic template
+  // Convert literal \n to real newlines
   const processedText = customText?.replace(/\\n/g, "\n");
 
   return {
@@ -59,7 +59,7 @@ function buildConfig(
   };
 }
 
-// ── Thumbnail preview (small canvas for gallery) ──
+// ── Uniform thumbnail card ──
 function StickerThumb({
   template,
   config,
@@ -76,7 +76,6 @@ function StickerThumb({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -87,50 +86,46 @@ function StickerThumb({
     try {
       template.render(ctx, config);
     } catch {
-      // Render error — leave blank
+      // silently fail
     }
   }, [template, config]);
-
-  // Calculate display size to fit in grid
-  const maxDisplayW = 240;
-  const aspect = template.height / template.width;
-  const displayW = Math.min(maxDisplayW, 240);
-  const displayH = displayW * aspect;
 
   return (
     <button
       onClick={onClick}
       className="sticker-thumb"
       style={{
-        background: "transparent",
-        border: selected
-          ? "2px solid var(--orange-5)"
-          : "2px solid transparent",
+        background: selected ? "var(--orange-1)" : "var(--bg)",
+        border: selected ? "2px solid var(--orange-4)" : "2px solid var(--border)",
         borderRadius: "14px",
-        padding: "8px",
+        padding: "10px",
         cursor: "pointer",
         transition: "all 0.15s",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "6px",
-        opacity: selected ? 1 : 0.8,
+        justifyContent: "center",
+        gap: "8px",
+        aspectRatio: "1",
       }}
     >
       <canvas
         ref={canvasRef}
         style={{
-          width: displayW,
-          height: displayH,
-          borderRadius: "10px",
+          width: "100%",
+          height: "auto",
+          borderRadius: "8px",
+          aspectRatio: `${template.width} / ${template.height}`,
+          objectFit: "contain",
         }}
       />
       <span
         style={{
-          fontSize: "0.7rem",
+          fontSize: "0.68rem",
           fontFamily: "var(--font-mono)",
           color: selected ? "var(--orange-5)" : "var(--text-muted)",
           fontWeight: selected ? 600 : 400,
+          letterSpacing: "0.02em",
         }}
       >
         {template.name}
@@ -152,7 +147,6 @@ function StickerPreview({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -163,7 +157,7 @@ function StickerPreview({
     try {
       template.render(ctx, config);
     } catch {
-      // Render error
+      // silently fail
     }
   }, [template, config]);
 
@@ -173,28 +167,24 @@ function StickerPreview({
     downloadCanvas(canvas, `lariviz-${template.id}.png`);
   };
 
-  // Scale to fit nicely
-  const maxW = 480;
-  const aspect = template.height / template.width;
-  const displayW = Math.min(maxW, 480);
-  const displayH = displayW * aspect;
-
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
       <div
         style={{
           background: "repeating-conic-gradient(#1a1a1a 0% 25%, #222 0% 50%) 50% / 20px 20px",
           borderRadius: "16px",
-          padding: "24px",
+          padding: "20px",
           display: "inline-block",
+          maxWidth: "100%",
         }}
       >
         <canvas
           ref={canvasRef}
           style={{
-            width: displayW,
-            height: displayH,
+            width: "min(400px, 100%)",
+            height: "auto",
             borderRadius: "12px",
+            aspectRatio: `${template.width} / ${template.height}`,
           }}
         />
       </div>
@@ -211,7 +201,6 @@ function StickerPreview({
           fontWeight: 700,
           cursor: "pointer",
           transition: "all 0.15s",
-          letterSpacing: "0.03em",
         }}
       >
         Download PNG
@@ -232,7 +221,6 @@ export function StickerTab({ activities }: Props) {
     loadStickerFonts().then(() => setFontsReady(true));
   }, []);
 
-  // Default to first activity
   useEffect(() => {
     if (activities.length > 0 && !selectedActivity) {
       setSelectedActivity(activities[0]);
@@ -262,39 +250,14 @@ export function StickerTab({ activities }: Props) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      {/* Step 1: Select a run */}
+      {/* Run selector — horizontal scroll */}
       <div>
-        <label
-          style={{
-            display: "block",
-            fontSize: "0.7rem",
-            fontFamily: "var(--font-mono)",
-            color: "var(--text-muted)",
-            marginBottom: "0.5rem",
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Select a run
-        </label>
-        <div
-          className="sticker-run-list"
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            overflowX: "auto",
-            paddingBottom: "0.5rem",
-          }}
-        >
+        <label style={sectionLabel}>Select a run</label>
+        <div className="sticker-run-list" style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.5rem" }}>
           {activities.slice(0, 30).map((a) => {
             const km = (a.distance / 1000).toFixed(1);
-            const date = new Date(a.start_date_local).toLocaleDateString(
-              "en-US",
-              { month: "short", day: "numeric" }
-            );
+            const date = new Date(a.start_date_local).toLocaleDateString("en-US", { month: "short", day: "numeric" });
             const isSelected = selectedActivity?.id === a.id;
-
             return (
               <button
                 key={a.id}
@@ -302,12 +265,8 @@ export function StickerTab({ activities }: Props) {
                 style={{
                   flexShrink: 0,
                   padding: "0.6rem 1rem",
-                  background: isSelected
-                    ? "linear-gradient(135deg, var(--orange-1), var(--orange-2))"
-                    : "var(--surface-2, var(--bg))",
-                  border: isSelected
-                    ? "1px solid var(--orange-3)"
-                    : "1px solid var(--border)",
+                  background: isSelected ? "linear-gradient(135deg, var(--orange-1), var(--orange-2))" : "var(--bg)",
+                  border: isSelected ? "1px solid var(--orange-3)" : "1px solid var(--border)",
                   borderRadius: "10px",
                   cursor: "pointer",
                   textAlign: "left",
@@ -315,27 +274,10 @@ export function StickerTab({ activities }: Props) {
                   transition: "all 0.15s",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: isSelected ? "var(--orange-5)" : "var(--text)",
-                    marginBottom: "2px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    maxWidth: "160px",
-                  }}
-                >
+                <div style={{ fontSize: "0.8rem", fontWeight: 600, color: isSelected ? "var(--orange-5)" : "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "160px" }}>
                   {a.name}
                 </div>
-                <div
-                  style={{
-                    fontSize: "0.7rem",
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--text-muted)",
-                  }}
-                >
+                <div style={{ fontSize: "0.7rem", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
                   {km} km · {date}
                 </div>
               </button>
@@ -346,143 +288,65 @@ export function StickerTab({ activities }: Props) {
 
       {selectedActivity && config && (
         <>
-          {/* Theme toggle + custom text */}
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              alignItems: "flex-end",
-              flexWrap: "wrap",
-            }}
-          >
-            {/* Dark / Clear toggle */}
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "0.7rem",
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-muted)",
-                  marginBottom: "0.4rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Theme
-              </label>
-              <div style={{ display: "flex", gap: "0.25rem" }}>
-                {(["dark", "clear"] as const).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTheme(t)}
-                    style={{
-                      padding: "0.35rem 0.8rem",
-                      border:
-                        theme === t
-                          ? "1px solid var(--orange-3)"
-                          : "1px solid var(--border)",
-                      borderRadius: "6px",
-                      background:
-                        theme === t
-                          ? "var(--orange-1)"
-                          : "transparent",
-                      color:
-                        theme === t
-                          ? "var(--orange-5)"
-                          : "var(--text-muted)",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom text input (if template supports it) */}
-            {currentTemplate.hasCustomText && (
-              <div style={{ flex: 1, minWidth: "200px" }}>
-                <label
+          {/* Controls row: theme + custom text inline */}
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "0.25rem" }}>
+              {(["dark", "clear"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTheme(t)}
                   style={{
-                    display: "block",
-                    fontSize: "0.7rem",
+                    padding: "0.35rem 0.75rem",
+                    border: theme === t ? "1px solid var(--orange-3)" : "1px solid var(--border)",
+                    borderRadius: "6px",
+                    background: theme === t ? "var(--orange-1)" : "transparent",
+                    color: theme === t ? "var(--orange-5)" : "var(--text-muted)",
                     fontFamily: "var(--font-mono)",
-                    color: "var(--text-muted)",
-                    marginBottom: "0.4rem",
+                    fontSize: "0.7rem",
                     fontWeight: 600,
-                    letterSpacing: "0.1em",
+                    cursor: "pointer",
                     textTransform: "uppercase",
                   }}
                 >
-                  Custom text
-                </label>
-                <input
-                  type="text"
-                  value={customTexts[selectedTemplate] || ""}
-                  onChange={(e) => setCustomText(e.target.value)}
-                  placeholder={currentTemplate.textPlaceholder || "Enter text..."}
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    background: "var(--bg)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    color: "var(--text)",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "0.8rem",
-                    outline: "none",
-                  }}
-                />
-                {currentTemplate.id === "poetic" && (
-                  <div
-                    style={{
-                      fontSize: "0.65rem",
-                      color: "var(--text-dim, var(--text-muted))",
-                      marginTop: "4px",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    Use \n for new line. Variables: {"{distance}"}, {"{pace}"},{" "}
-                    {"{time}"}, {"{location}"}
-                  </div>
-                )}
-              </div>
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            {currentTemplate.hasCustomText && (
+              <input
+                type="text"
+                value={customTexts[selectedTemplate] || ""}
+                onChange={(e) => setCustomText(e.target.value)}
+                placeholder={currentTemplate.textPlaceholder || "Custom text..."}
+                style={{
+                  flex: 1,
+                  minWidth: "180px",
+                  padding: "0.45rem 0.75rem",
+                  background: "var(--bg)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                  color: "var(--text)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.78rem",
+                  outline: "none",
+                }}
+              />
             )}
           </div>
 
-          {/* Preview area */}
-          <div style={{ marginBottom: "1rem" }}>
-            <StickerPreview template={currentTemplate} config={config} />
-          </div>
+          {/* Preview */}
+          <StickerPreview template={currentTemplate} config={config} />
 
-          {/* Template gallery */}
+          {/* Template gallery — uniform grid */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.7rem",
-                fontFamily: "var(--font-mono)",
-                color: "var(--text-muted)",
-                marginBottom: "0.5rem",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Templates
-            </label>
+            <label style={sectionLabel}>Templates</label>
             <div
               className="sticker-gallery"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "0.5rem",
+                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gap: "0.6rem",
               }}
             >
               {templates.map((t) => (
@@ -500,17 +364,21 @@ export function StickerTab({ activities }: Props) {
       )}
 
       {activities.length === 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "3rem",
-            color: "var(--text-muted)",
-            fontSize: "0.85rem",
-          }}
-        >
-          No runs found for this period. Try a different filter.
+        <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+          No runs found. Try a different filter.
         </div>
       )}
     </div>
   );
 }
+
+const sectionLabel: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.7rem",
+  fontFamily: "var(--font-mono)",
+  color: "var(--text-muted)",
+  marginBottom: "0.5rem",
+  fontWeight: 600,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+};

@@ -1,63 +1,64 @@
 import type { StickerTemplate, StickerConfig } from "./types";
-import { getColors, fillRoundedRect, strokeRoundedRect, drawTextCentered, drawWatermark } from "./shared";
+import { getColors, fillRoundedRect, strokeRoundedRect, drawWatermark } from "./shared";
 
-// Giant distance number, "kilometers" in italic serif below
-const S = 2; // retina scale
+// "Monument" — giant hollow/outlined distance number
+const S = 2;
 const W = 540 * S;
-const H = 380 * S;
+const H = 540 * S;
 
 function render(ctx: CanvasRenderingContext2D, config: StickerConfig) {
   const c = getColors(config.theme);
-  const pad = 40 * S;
 
-  // Background
   if (config.theme === "dark") {
-    fillRoundedRect(ctx, 0, 0, W, H, 24 * S, c.bg);
-    strokeRoundedRect(ctx, 0, 0, W, H, 24 * S, c.border, S);
+    fillRoundedRect(ctx, 0, 0, W, H, 28 * S, c.bg);
+    strokeRoundedRect(ctx, 0, 0, W, H, 28 * S, c.border, S);
   }
 
   const cx = W / 2;
 
-  // "DISTANCE" label
-  ctx.font = `600 ${14 * S}px 'JetBrains Mono', monospace`;
-  ctx.fillStyle = c.textDim;
-  ctx.letterSpacing = `${4 * S}px`;
-  const labelW = ctx.measureText("DISTANCE").width;
-  ctx.fillText("DISTANCE", cx - labelW / 2, 60 * S);
-  ctx.letterSpacing = "0px";
+  // Giant outlined distance number (stroke, no fill)
+  ctx.font = `900 ${180 * S}px Outfit, sans-serif`;
+  ctx.strokeStyle = c.accent;
+  ctx.lineWidth = 2.5 * S;
+  const numW = ctx.measureText(config.distanceKm).width;
+  ctx.strokeText(config.distanceKm, cx - numW / 2, 300 * S);
 
-  // Big distance number
-  const dist = config.distanceKm;
-  ctx.font = `800 ${120 * S}px Outfit, sans-serif`;
-  ctx.fillStyle = c.text;
-  const numW = ctx.measureText(dist).width;
-  ctx.fillText(dist, cx - numW / 2, 195 * S);
+  // Faint filled version behind for depth
+  ctx.fillStyle = c.accentDim;
+  ctx.fillText(config.distanceKm, cx - numW / 2, 300 * S);
 
-  // "kilometers" in italic serif
-  ctx.font = `italic 400 ${28 * S}px 'Playfair Display', Georgia, serif`;
+  // "km" — small, offset to the right
+  ctx.font = `300 ${28 * S}px Outfit, sans-serif`;
   ctx.fillStyle = c.textMuted;
-  const kmW = ctx.measureText("kilometers").width;
-  ctx.fillText("kilometers", cx - kmW / 2, 240 * S);
+  ctx.fillText("km", cx + numW / 2 - 20 * S, 320 * S);
 
-  // Divider line
+  // Horizontal accent line
   ctx.strokeStyle = c.accent;
   ctx.lineWidth = 2 * S;
   ctx.beginPath();
-  ctx.moveTo(cx - 30 * S, 270 * S);
-  ctx.lineTo(cx + 30 * S, 270 * S);
+  ctx.moveTo(cx - 80 * S, 360 * S);
+  ctx.lineTo(cx + 80 * S, 360 * S);
   ctx.stroke();
 
-  // Run name + pace
-  const subtext = `${config.pace} /km  ·  ${config.duration}`;
-  drawTextCentered(ctx, subtext, cx, 310 * S, `400 ${14 * S}px 'JetBrains Mono', monospace`, c.textDim);
+  // Run name below line — serif italic
+  ctx.font = `italic 400 ${22 * S}px 'Playfair Display', Georgia, serif`;
+  ctx.fillStyle = c.text;
+  const nameW = ctx.measureText(config.activity.name).width;
+  ctx.fillText(config.activity.name, cx - nameW / 2, 400 * S);
 
-  // Watermark
-  drawWatermark(ctx, pad, H - 28 * S, c.textDim, 12 * S);
+  // Pace + duration at bottom
+  ctx.font = `400 ${14 * S}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = c.textDim;
+  const bottomLine = `${config.pace} /km  ·  ${config.duration}  ·  ${config.date}`;
+  const blW = ctx.measureText(bottomLine).width;
+  ctx.fillText(bottomLine, cx - blW / 2, 450 * S);
+
+  drawWatermark(ctx, 40 * S, H - 30 * S, c.textDim, 11 * S);
 }
 
 export const bigNumber: StickerTemplate = {
   id: "big-number",
-  name: "Big Number",
+  name: "Monument",
   width: W,
   height: H,
   hasCustomText: false,

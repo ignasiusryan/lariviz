@@ -1,123 +1,108 @@
 import type { StickerTemplate, StickerConfig } from "./types";
-import { getColors, fillRoundedRect, strokeRoundedRect } from "./shared";
+import { getColors, fillRoundedRect, strokeRoundedRect, drawWatermark } from "./shared";
 
+// "Orbit" — concentric rings with stats at orbital positions
 const S = 2;
-const W = 420 * S;
-const H = 420 * S;
+const W = 540 * S;
+const H = 540 * S;
 
 function render(ctx: CanvasRenderingContext2D, config: StickerConfig) {
   const c = getColors(config.theme);
 
   if (config.theme === "dark") {
-    fillRoundedRect(ctx, 0, 0, W, H, 24 * S, c.bg);
-    strokeRoundedRect(ctx, 0, 0, W, H, 24 * S, c.border, S);
+    fillRoundedRect(ctx, 0, 0, W, H, 28 * S, c.bg);
+    strokeRoundedRect(ctx, 0, 0, W, H, 28 * S, c.border, S);
   }
 
   const cx = W / 2;
   const cy = H / 2;
-  const radius = 160 * S;
 
-  // Outer circle
-  ctx.strokeStyle = c.textDim;
-  ctx.lineWidth = 2 * S;
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Inner circle (slightly smaller, dashed)
-  ctx.setLineDash([4 * S, 4 * S]);
+  // Outer ring — thin dashed
+  ctx.setLineDash([8 * S, 6 * S]);
   ctx.strokeStyle = c.border;
-  ctx.lineWidth = S;
+  ctx.lineWidth = 1.5 * S;
   ctx.beginPath();
-  ctx.arc(cx, cy, radius - 12 * S, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 220 * S, 0, Math.PI * 2);
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Text along circle path
-  const items = [
-    `${config.distanceKm} KM`,
-    `${config.pace} PACE`,
-    config.duration,
-  ];
-  const fullText = items.join("  ·  ");
-
-  ctx.font = `600 ${14 * S}px 'JetBrains Mono', monospace`;
-  ctx.fillStyle = c.text;
-
-  // Measure total width to calculate angular span
-  const charWidths: number[] = [];
-  for (const ch of fullText) {
-    charWidths.push(ctx.measureText(ch).width);
-  }
-  const totalWidth = charWidths.reduce((a, b) => a + b, 0);
-  const textRadius = radius - 30 * S;
-  const totalAngle = totalWidth / textRadius;
-
-  // Start from top, going clockwise
-  let angle = -Math.PI / 2 - totalAngle / 2;
-
-  ctx.save();
-  for (let i = 0; i < fullText.length; i++) {
-    const ch = fullText[i];
-    const halfChar = charWidths[i] / 2;
-    angle += halfChar / textRadius;
-
-    ctx.save();
-    ctx.translate(
-      cx + textRadius * Math.cos(angle),
-      cy + textRadius * Math.sin(angle)
-    );
-    ctx.rotate(angle + Math.PI / 2);
-
-    // Highlight dots in accent color
-    if (ch === "·") {
-      ctx.fillStyle = c.accent;
-    } else {
-      ctx.fillStyle = c.text;
-    }
-    ctx.fillText(ch, -halfChar, 0);
-    ctx.restore();
-
-    angle += halfChar / textRadius;
-  }
-  ctx.restore();
-
-  // Center: small sun/run icon
+  // Middle ring — solid accent, partial arc
   ctx.strokeStyle = c.accent;
-  ctx.lineWidth = 2 * S;
-  const iconR = 8 * S;
+  ctx.lineWidth = 3 * S;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(cx, cy - 20 * S, iconR, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 170 * S, -Math.PI * 0.6, Math.PI * 0.9);
   ctx.stroke();
 
-  // Sun rays
-  for (let i = 0; i < 8; i++) {
-    const a = (i * Math.PI * 2) / 8;
-    const inner = iconR + 4 * S;
-    const outer = iconR + 10 * S;
+  // Inner ring — thin
+  ctx.strokeStyle = c.textDim;
+  ctx.lineWidth = S;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 120 * S, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Center — big distance
+  ctx.font = `800 ${72 * S}px Outfit, sans-serif`;
+  ctx.fillStyle = c.text;
+  const distW = ctx.measureText(config.distanceKm).width;
+  ctx.fillText(config.distanceKm, cx - distW / 2, cy + 10 * S);
+
+  // "km" below
+  ctx.font = `300 ${22 * S}px Outfit, sans-serif`;
+  ctx.fillStyle = c.textMuted;
+  const kmW = ctx.measureText("km").width;
+  ctx.fillText("km", cx - kmW / 2, cy + 40 * S);
+
+  // Stats placed at orbital positions on the middle ring
+  const orbitR = 170 * S;
+  const orbitItems = [
+    { label: "PACE", value: config.pace, angle: -Math.PI * 0.55 },
+    { label: "TIME", value: config.duration, angle: Math.PI * 0.05 },
+    { label: "DATE", value: config.date, angle: Math.PI * 0.6 },
+  ];
+
+  for (const item of orbitItems) {
+    const ox = cx + orbitR * Math.cos(item.angle);
+    const oy = cy + orbitR * Math.sin(item.angle);
+
+    // Background pill
+    ctx.font = `600 ${16 * S}px Outfit, sans-serif`;
+    const valW = ctx.measureText(item.value).width;
+    const pillW = valW + 24 * S;
+    const pillH = 32 * S;
+
+    fillRoundedRect(ctx, ox - pillW / 2, oy - pillH / 2, pillW, pillH, pillH / 2,
+      config.theme === "dark" ? c.bg : "rgba(0,0,0,0.5)");
+
+    ctx.strokeStyle = c.border;
+    ctx.lineWidth = S;
     ctx.beginPath();
-    ctx.moveTo(cx + inner * Math.cos(a), cy - 20 * S + inner * Math.sin(a));
-    ctx.lineTo(cx + outer * Math.cos(a), cy - 20 * S + outer * Math.sin(a));
+    ctx.roundRect(ox - pillW / 2, oy - pillH / 2, pillW, pillH, pillH / 2);
     ctx.stroke();
+
+    ctx.fillStyle = c.text;
+    ctx.fillText(item.value, ox - valW / 2, oy + 6 * S);
   }
 
-  // Date below icon
-  ctx.font = `400 ${12 * S}px 'JetBrains Mono', monospace`;
-  ctx.fillStyle = c.textMuted;
-  const dateStr = config.date;
-  const dateW = ctx.measureText(dateStr).width;
-  ctx.fillText(dateStr, cx - dateW / 2, cy + 25 * S);
+  // Small accent dot at start of accent arc
+  const dotAngle = -Math.PI * 0.6;
+  ctx.fillStyle = c.accent;
+  ctx.beginPath();
+  ctx.arc(cx + orbitR * Math.cos(dotAngle), cy + orbitR * Math.sin(dotAngle), 5 * S, 0, Math.PI * 2);
+  ctx.fill();
 
-  // Watermark at bottom
-  ctx.font = `600 ${9 * S}px 'JetBrains Mono', monospace`;
-  ctx.fillStyle = c.textDim;
-  const wmW = ctx.measureText("LARIVIZ").width;
-  ctx.fillText("LARIVIZ", cx - wmW / 2, H - 22 * S);
+  // Accent dot at end
+  const dotAngle2 = Math.PI * 0.9;
+  ctx.beginPath();
+  ctx.arc(cx + orbitR * Math.cos(dotAngle2), cy + orbitR * Math.sin(dotAngle2), 5 * S, 0, Math.PI * 2);
+  ctx.fill();
+
+  drawWatermark(ctx, 40 * S, H - 24 * S, c.textDim, 9 * S);
 }
 
 export const circularStamp: StickerTemplate = {
   id: "circular-stamp",
-  name: "Circular Stamp",
+  name: "Orbit",
   width: W,
   height: H,
   hasCustomText: false,
