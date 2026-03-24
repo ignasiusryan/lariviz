@@ -7,8 +7,7 @@ export function buildMapStyle(palette: PosterPalette): StyleSpecification {
     sources: {
       openmaptiles: {
         type: "vector",
-        tiles: ["https://tiles.openfreemap.org/planet/{z}/{x}/{y}.pbf"],
-        maxzoom: 14,
+        url: "https://tiles.openfreemap.org/planet",
       },
     },
     glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
