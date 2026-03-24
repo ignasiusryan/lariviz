@@ -93,8 +93,8 @@ export function PosterMap({ polyline, palette, width, height, onMapReady }: Prop
         source: "route",
         paint: {
           "line-color": palette.routeGlow,
-          "line-width": 18,
-          "line-blur": 14,
+          "line-width": 24,
+          "line-blur": 18,
         },
         layout: { "line-cap": "round", "line-join": "round" },
       });
@@ -106,8 +106,8 @@ export function PosterMap({ polyline, palette, width, height, onMapReady }: Prop
         source: "route",
         paint: {
           "line-color": palette.routeGlow,
-          "line-width": 8,
-          "line-blur": 4,
+          "line-width": 12,
+          "line-blur": 6,
         },
         layout: { "line-cap": "round", "line-join": "round" },
       });
@@ -119,7 +119,7 @@ export function PosterMap({ polyline, palette, width, height, onMapReady }: Prop
         source: "route",
         paint: {
           "line-color": palette.routeColor,
-          "line-width": 3.5,
+          "line-width": 5,
         },
         layout: { "line-cap": "round", "line-join": "round" },
       });
@@ -139,7 +139,7 @@ export function PosterMap({ polyline, palette, width, height, onMapReady }: Prop
         type: "circle",
         source: "start",
         paint: {
-          "circle-radius": 5,
+          "circle-radius": 6,
           "circle-color": palette.routeColor,
           "circle-stroke-width": 2,
           "circle-stroke-color": palette.bg,

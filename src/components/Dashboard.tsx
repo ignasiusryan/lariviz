@@ -591,7 +591,7 @@ export function Dashboard({ athleteName }: Props) {
               Map Poster
             </h2>
           </div>
-          <PosterTab activities={filteredActivities} />
+          <PosterTab activities={filteredActivities} athleteName={athleteName} />
         </div>
       )}
 

@@ -10,6 +10,7 @@ import type maplibregl from "maplibre-gl";
 
 interface Props {
   activities: Activity[];
+  athleteName: string;
 }
 
 function getLocation(a: Activity): string {
@@ -37,7 +38,7 @@ const POSTER_W = 1080;
 const POSTER_H = 1920;
 const PREVIEW_SCALE = 0.38; // preview at ~410px wide
 
-export function PosterTab({ activities }: Props) {
+export function PosterTab({ activities, athleteName }: Props) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [paletteId, setPaletteId] = useState("gold");
   const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
@@ -108,13 +109,13 @@ export function PosterTab({ activities }: Props) {
 
       // Activity name — Inter font, large spaced letters
       const name = selectedActivity.name.toUpperCase();
-      ctx.font = "700 52px Inter, sans-serif";
+      ctx.font = "700 52px 'Plus Jakarta Sans', sans-serif";
       ctx.fillStyle = p.text;
       ctx.letterSpacing = "10px";
       const nameW = ctx.measureText(name).width;
       if (nameW > POSTER_W - 120) {
         const scale = (POSTER_W - 120) / nameW;
-        ctx.font = `700 ${Math.floor(52 * scale)}px Inter, sans-serif`;
+        ctx.font = `700 ${Math.floor(52 * scale)}px 'Plus Jakarta Sans', sans-serif`;
       }
       const finalNameW = ctx.measureText(name).width;
       ctx.fillText(name, cx - finalNameW / 2, textZoneTop + 44);
@@ -128,15 +129,27 @@ export function PosterTab({ activities }: Props) {
       ctx.lineTo(cx + 50, textZoneTop + 64);
       ctx.stroke();
 
+      // Date and athlete name
+      const dateLabel = new Date(selectedActivity.start_date_local).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }).toUpperCase();
+      const metaLine = athleteName ? `${dateLabel}  ·  ${athleteName.toUpperCase()}` : dateLabel;
+      ctx.font = "500 20px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillStyle = p.textMuted;
+      ctx.letterSpacing = "4px";
+      const metaW = ctx.measureText(metaLine).width;
+      ctx.fillText(metaLine, cx - metaW / 2, textZoneTop + 96);
+      ctx.letterSpacing = "0px";
+
       // Location
       const location = getLocation(selectedActivity);
       if (location) {
-        ctx.font = "400 24px Inter, sans-serif";
+        ctx.font = "400 18px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = p.textMuted;
         ctx.letterSpacing = "5px";
+        ctx.globalAlpha = 0.7;
         const locW = ctx.measureText(location.toUpperCase()).width;
-        ctx.fillText(location.toUpperCase(), cx - locW / 2, textZoneTop + 104);
+        ctx.fillText(location.toUpperCase(), cx - locW / 2, textZoneTop + 128);
         ctx.letterSpacing = "0px";
+        ctx.globalAlpha = 1;
       }
 
       // Stats row — bigger
@@ -148,12 +161,12 @@ export function PosterTab({ activities }: Props) {
         { label: "PACE", value: paceMin > 0 ? `${formatPace(paceMin)} /km` : "—" },
       ];
 
-      const statsY = textZoneTop + 174;
+      const statsY = textZoneTop + 200;
       const statColW = (POSTER_W - 120) / stats.length;
       for (let i = 0; i < stats.length; i++) {
         const sx = 60 + statColW * i + statColW / 2;
 
-        ctx.font = "600 42px Inter, sans-serif";
+        ctx.font = "600 42px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = p.text;
         const vw = ctx.measureText(stats[i].value).width;
         ctx.fillText(stats[i].value, sx - vw / 2, statsY);
@@ -189,7 +202,7 @@ export function PosterTab({ activities }: Props) {
     }
 
     setExporting(false);
-  }, [mapInstance, selectedActivity, palette]);
+  }, [mapInstance, selectedActivity, palette, athleteName]);
 
   if (qualifyingRuns.length === 0) {
     return (
@@ -316,7 +329,7 @@ export function PosterTab({ activities }: Props) {
                   {/* Activity name — Inter font */}
                   <div
                     style={{
-                      fontFamily: "Inter, sans-serif",
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
                       fontSize: 52,
                       fontWeight: 700,
                       color: palette.text,
@@ -336,16 +349,32 @@ export function PosterTab({ activities }: Props) {
                   {/* Accent line */}
                   <div style={{ width: 100, height: 2, background: palette.accent }} />
 
+                  {/* Date and athlete name */}
+                  <div
+                    style={{
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontSize: 20,
+                      fontWeight: 500,
+                      color: palette.textMuted,
+                      letterSpacing: "4px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {new Date(selectedActivity.start_date_local).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    {athleteName && `  ·  ${athleteName}`}
+                  </div>
+
                   {/* Location */}
                   {getLocation(selectedActivity) && (
                     <div
                       style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: 24,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontSize: 18,
                         fontWeight: 400,
                         color: palette.textMuted,
                         letterSpacing: "5px",
                         textTransform: "uppercase",
+                        opacity: 0.7,
                       }}
                     >
                       {getLocation(selectedActivity)}
@@ -363,7 +392,7 @@ export function PosterTab({ activities }: Props) {
                         { label: "PACE", value: paceMin > 0 ? `${formatPace(paceMin)} /km` : "—" },
                       ].map((stat) => (
                         <div key={stat.label} style={{ textAlign: "center" }}>
-                          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 42, fontWeight: 600, color: palette.text }}>
+                          <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 42, fontWeight: 600, color: palette.text }}>
                             {stat.value}
                           </div>
                           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, color: palette.textMuted, letterSpacing: "3px", marginTop: 6 }}>
