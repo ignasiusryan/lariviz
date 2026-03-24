@@ -187,10 +187,10 @@ export function Dashboard({ athleteName }: Props) {
 
   const downloadFilename =
     mode.type === "all"
-      ? "strava-heatmap-all-years.png"
+      ? "lariviz-heatmap-all-years.png"
       : mode.type === "rolling"
-        ? "strava-heatmap-past-year.png"
-        : `strava-heatmap-${mode.year}.png`;
+        ? "lariviz-heatmap-past-year.png"
+        : `lariviz-heatmap-${mode.year}.png`;
 
   return (
     <div
@@ -226,7 +226,7 @@ export function Dashboard({ athleteName }: Props) {
               marginBottom: "0.4rem",
             }}
           >
-            Strava Heatmap
+            Lariviz
           </div>
           <h1
             style={{

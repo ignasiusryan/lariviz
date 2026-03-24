@@ -254,7 +254,7 @@ export function PaceChart({
       // Header
       ctx.fillStyle = c.orange5;
       ctx.font = `600 ${7 * S}px 'JetBrains Mono', monospace`;
-      ctx.fillText("STRAVA HEATMAP", px, py + 10 * S);
+      ctx.fillText("LARIVIZ", px, py + 10 * S);
 
       ctx.fillStyle = c.text;
       ctx.font = `800 ${16 * S}px Outfit, sans-serif`;
@@ -346,7 +346,7 @@ export function PaceChart({
         }
       }
 
-      downloadCanvas(canvas, "strava-pace-chart.png");
+      downloadCanvas(canvas, "lariviz-pace-chart.png");
     } catch (e) {
       console.error("Download failed:", e);
     }

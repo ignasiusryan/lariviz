@@ -69,7 +69,7 @@ export function DownloadStackedButton({ years, dateMap, athleteName }: Props) {
       // Header
       ctx.fillStyle = c.orange5;
       ctx.font = `600 ${7 * S}px 'JetBrains Mono', monospace`;
-      ctx.fillText("STRAVA HEATMAP", ox, oy + 10 * S);
+      ctx.fillText("LARIVIZ", ox, oy + 10 * S);
 
       ctx.fillStyle = c.text;
       ctx.font = `800 ${18 * S}px Outfit, sans-serif`;
@@ -184,7 +184,7 @@ export function DownloadStackedButton({ years, dateMap, athleteName }: Props) {
       ctx.fillStyle = c.textDim;
       ctx.fillText("More", lx, oy + cellSize * 0.75);
 
-      downloadCanvas(canvas, "strava-heatmap-all-years.png");
+      downloadCanvas(canvas, "lariviz-heatmap-all-years.png");
     } catch (e) {
       console.error("Download failed:", e);
     }

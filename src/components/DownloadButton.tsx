@@ -73,7 +73,7 @@ export function DownloadButton({ heatmapData, activities, athleteName, filename 
       // ── Header ──
       ctx.fillStyle = c.orange5;
       ctx.font = `600 ${7 * S}px 'JetBrains Mono', monospace`;
-      ctx.fillText("STRAVA HEATMAP", ox, oy + 10 * S);
+      ctx.fillText("LARIVIZ", ox, oy + 10 * S);
 
       ctx.fillStyle = c.text;
       ctx.font = `800 ${18 * S}px Outfit, sans-serif`;

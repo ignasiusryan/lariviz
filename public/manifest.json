@@ -1,6 +1,6 @@
 {
-  "name": "Run Heatmap — Strava Dashboard",
-  "short_name": "Run Heatmap",
+  "name": "Lariviz — Visualize Your Run",
+  "short_name": "Lariviz",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

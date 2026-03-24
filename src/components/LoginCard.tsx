@@ -61,7 +61,7 @@ export function LoginCard() {
               fontFamily: "var(--font-mono)",
             }}
           >
-            Strava Heatmap
+            Lariviz
           </div>
           <ThemeToggle />
         </div>
@@ -84,7 +84,7 @@ export function LoginCard() {
             lineHeight: 1.5,
           }}
         >
-          Visualize your running activity like a GitHub contributions chart.
+          Visualize your run — heatmaps, pace insights, route maps, and more.
         </p>
 
         <a

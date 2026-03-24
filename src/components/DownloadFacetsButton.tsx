@@ -65,7 +65,7 @@ export function DownloadFacetsButton({ activities, athleteName }: Props) {
       // Header
       ctx.fillStyle = c.orange5;
       ctx.font = `600 ${7 * S}px 'JetBrains Mono', monospace`;
-      ctx.fillText("STRAVA HEATMAP", ox, oy + 10 * S);
+      ctx.fillText("LARIVIZ", ox, oy + 10 * S);
 
       ctx.fillStyle = c.text;
       ctx.font = `800 ${18 * S}px Outfit, sans-serif`;
@@ -109,7 +109,7 @@ export function DownloadFacetsButton({ activities, athleteName }: Props) {
         ctx.stroke();
       }
 
-      downloadCanvas(canvas, "strava-route-facets.png");
+      downloadCanvas(canvas, "lariviz-route-facets.png");
     } catch (e) {
       console.error("Download failed:", e);
     }

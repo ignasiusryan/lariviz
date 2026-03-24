@@ -10,13 +10,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Run Heatmap — Strava Dashboard",
-  description: "Visualize your running activity like a GitHub contributions chart",
+  title: "Lariviz — Visualize Your Run",
+  description: "Visualize your running activity with heatmaps, pace charts, and route maps",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Run Heatmap",
+    title: "Lariviz",
   },
 };
 
