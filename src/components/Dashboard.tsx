@@ -15,8 +15,9 @@ import { StravaAttribution } from "./StravaAttribution";
 import { RouteFacets } from "./RouteFacets";
 import { PaceChart } from "./PaceChart";
 import { RunTimesChart } from "./RunTimesChart";
+import { PersonalRecords } from "./PersonalRecords";
 
-type View = "heatmap" | "routes" | "insights" | "times";
+type View = "heatmap" | "routes" | "insights" | "times" | "records";
 
 export interface Activity {
   id: number;
@@ -303,12 +304,13 @@ export function Dashboard({ athleteName }: Props) {
           marginBottom: "1rem",
         }}
       >
-        {(["heatmap", "routes", "insights", "times"] as const).map((v) => {
+        {(["heatmap", "routes", "insights", "times", "records"] as const).map((v) => {
           const labels: Record<View, string> = {
             heatmap: "Heatmap",
             routes: "Routes",
             insights: "Insights",
             times: "Run Times",
+            records: "Records",
           };
           return (
             <button
@@ -491,6 +493,36 @@ export function Dashboard({ athleteName }: Props) {
             </h2>
           </div>
           <RunTimesChart activities={filteredActivities} />
+        </div>
+      )}
+
+      {view === "records" && (
+        <div
+          className="card-section"
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "18px",
+            padding: "2rem",
+            marginBottom: "2rem",
+            overflow: "hidden",
+            animation: "slideUp 0.5s ease 0.25s both",
+          }}
+        >
+          <div
+            className="card-header"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
+              Personal Records
+            </h2>
+          </div>
+          <PersonalRecords activities={filteredActivities} />
         </div>
       )}
 
