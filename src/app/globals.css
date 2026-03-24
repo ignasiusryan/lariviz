@@ -225,4 +225,23 @@ body::before {
     grid-template-columns: 1fr !important;
     gap: 0.75rem !important;
   }
+
+  .sticker-run-list {
+    gap: 0.4rem !important;
+  }
+
+  .sticker-run-list button {
+    min-width: 120px !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .sticker-gallery {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.4rem !important;
+  }
+
+  .sticker-thumb canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
 }
