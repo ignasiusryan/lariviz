@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { buildHeatmap, type HeatmapMode } from "@/lib/heatmap";
 import { geocodeActivities, getGeocodedLocation } from "@/lib/geocode";
+import { decodePolyline } from "@/lib/polyline";
 import { StatsRow } from "./StatsRow";
 import { Heatmap } from "./Heatmap";
 import { StackedHeatmap } from "./StackedHeatmap";
@@ -109,7 +110,17 @@ export function Dashboard({ athleteName }: Props) {
           }
         }
 
-        // Reverse-geocode activities client-side using Nominatim
+        // Fill in start_latlng from polyline when missing
+        for (const a of data) {
+          if ((!a.start_latlng || a.start_latlng.length !== 2) && a.map?.summary_polyline) {
+            const pts = decodePolyline(a.map.summary_polyline);
+            if (pts.length > 0) {
+              a.start_latlng = pts[0];
+            }
+          }
+        }
+
+        // Reverse-geocode activities client-side using BigDataCloud
         geocodeActivities(data).then(() => {
           setActivities((prev) =>
             prev.map((a) => {

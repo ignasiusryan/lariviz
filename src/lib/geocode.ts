@@ -1,18 +1,43 @@
-// Client-side reverse geocoding using OpenStreetMap Nominatim
-// Caches results by ~11km grid cell, rate-limited to 1 req/sec
+// Client-side reverse geocoding using BigDataCloud (free, no API key, no strict rate limits)
+// Caches results by ~11km grid cell
 
 const cache = new Map<string, { city: string | null; country: string | null }>();
-let lastRequest = 0;
 
 function gridKey(lat: number, lng: number): string {
   return `${Math.round(lat * 10) / 10},${Math.round(lng * 10) / 10}`;
 }
 
-async function throttle() {
-  const now = Date.now();
-  const wait = Math.max(0, 1100 - (now - lastRequest));
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  lastRequest = Date.now();
+function extractCity(data: Record<string, unknown>): string | null {
+  // Use the top-level city if available
+  const city = data.city as string | undefined;
+
+  // Also check administrative levels for province/region (e.g., "Provinsi Bali")
+  const adminLevels = (
+    (data.localityInfo as Record<string, unknown>)?.administrative as
+      Array<{ order: number; name: string; description?: string }> | undefined
+  ) || [];
+
+  // Find province level (order 6-7 typically) for context
+  const province = adminLevels.find(
+    (a) => a.order >= 6 && a.order <= 7 && a.name !== city
+  );
+
+  // If city exists and is different from province, use "City, Province" style
+  // But only if province is meaningful (not just an island name)
+  if (city && province) {
+    const provName = province.name.replace(/^Provinsi\s+/i, "");
+    // If city and province are the same, just return city
+    if (provName.toLowerCase() === city.toLowerCase()) return city;
+    return `${city}, ${provName}`;
+  }
+
+  if (city) return city;
+
+  // Fallback: use province name
+  if (province) return province.name.replace(/^Provinsi\s+/i, "");
+
+  // Last resort: locality
+  return (data.locality as string) || null;
 }
 
 async function reverseGeocode(
@@ -22,20 +47,13 @@ async function reverseGeocode(
   const key = gridKey(lat, lng);
   if (cache.has(key)) return cache.get(key)!;
 
-  await throttle();
-
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&accept-language=en`;
-    const res = await fetch(url, {
-      headers: { "User-Agent": "lariviz.xyz" },
-    });
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+    const res = await fetch(url);
     if (res.ok) {
       const data = await res.json();
-      const addr = data.address || {};
-      const city =
-        addr.city || addr.town || addr.village || addr.municipality ||
-        addr.county || addr.state || null;
-      const country = addr.country || null;
+      const city = extractCity(data);
+      const country = (data.countryName as string) || null;
       const result = { city, country };
       cache.set(key, result);
       return result;
@@ -56,30 +74,26 @@ export interface GeoActivity {
 
 /**
  * Reverse-geocode a batch of activities.
- * Returns a Map from grid key to { city, country }.
- * Deduplicates and rate-limits automatically.
+ * Deduplicates by ~11km grid, caches results.
  */
 export async function geocodeActivities(
   activities: GeoActivity[],
-  onProgress?: (resolved: number, total: number) => void
 ): Promise<Map<string, { city: string | null; country: string | null }>> {
   // Collect unique grid cells that need geocoding
   const toResolve = new Map<string, { lat: number; lng: number }>();
   for (const a of activities) {
     if (!a.start_latlng || a.start_latlng.length !== 2) continue;
-    if (a.location_city) continue; // already has city from Strava
     const key = gridKey(a.start_latlng[0], a.start_latlng[1]);
     if (!cache.has(key) && !toResolve.has(key)) {
       toResolve.set(key, { lat: a.start_latlng[0], lng: a.start_latlng[1] });
     }
   }
 
+  // Fetch all in parallel (BigDataCloud has no strict rate limits)
   const entries = [...toResolve.entries()];
-  for (let i = 0; i < entries.length; i++) {
-    const [, coord] = entries[i];
-    await reverseGeocode(coord.lat, coord.lng);
-    onProgress?.(i + 1, entries.length);
-  }
+  await Promise.all(
+    entries.map(([, coord]) => reverseGeocode(coord.lat, coord.lng))
+  );
 
   return cache;
 }
