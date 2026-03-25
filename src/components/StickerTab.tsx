@@ -5,12 +5,32 @@ import type { Activity } from "./Dashboard";
 import { templates } from "./stickers/registry";
 import type { InsightTemplate, InsightConfig, Shoe } from "./stickers/types";
 import { loadStickerFonts } from "./stickers/shared";
-import { downloadCanvas } from "@/lib/download-theme";
 
 interface Props {
   activities: Activity[];
   athleteName: string;
   shoes: Shoe[];
+}
+
+/** Render a sticker template onto a canvas at a given scale factor */
+function renderScaled(
+  canvas: HTMLCanvasElement,
+  template: InsightTemplate,
+  config: InsightConfig,
+  scale: number
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  canvas.width = template.width * scale;
+  canvas.height = template.height * scale;
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, template.width, template.height);
+  try {
+    template.render(ctx, config);
+  } catch {
+    /* silently fail */
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 // ── Thumbnail ──
@@ -30,14 +50,8 @@ function InsightThumb({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    canvas.width = template.width;
-    canvas.height = template.height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    try {
-      template.render(ctx, config);
-    } catch { /* silently fail */ }
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    renderScaled(canvas, template, config, dpr);
   }, [template, config]);
 
   return (
@@ -92,25 +106,28 @@ function InsightPreview({
   template: InsightTemplate;
   config: InsightConfig;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewRef = useRef<HTMLCanvasElement>(null);
+  const downloadRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    canvas.width = template.width;
-    canvas.height = template.height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    try {
-      template.render(ctx, config);
-    } catch { /* silently fail */ }
+    // Render preview at device DPR for crisp display
+    if (previewRef.current) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      renderScaled(previewRef.current, template, config, dpr);
+    }
+    // Render download canvas at 3x for high-res export
+    if (downloadRef.current) {
+      renderScaled(downloadRef.current, template, config, 3);
+    }
   }, [template, config]);
 
   const handleDownload = () => {
-    const canvas = canvasRef.current;
+    const canvas = downloadRef.current;
     if (!canvas) return;
-    downloadCanvas(canvas, `lariviz-${template.id}.png`);
+    const link = document.createElement("a");
+    link.download = `lariviz-${template.id}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   };
 
   return (
@@ -125,7 +142,7 @@ function InsightPreview({
         }}
       >
         <canvas
-          ref={canvasRef}
+          ref={previewRef}
           style={{
             width: "min(400px, 100%)",
             height: "auto",
@@ -133,6 +150,8 @@ function InsightPreview({
             aspectRatio: "1",
           }}
         />
+        {/* Hidden high-res canvas for download */}
+        <canvas ref={downloadRef} style={{ display: "none" }} />
       </div>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
