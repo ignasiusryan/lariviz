@@ -107,6 +107,9 @@ export const cityStamps: InsightTemplate = {
     }
 
     // Footer
+    if (config.athleteName) {
+      drawTextCentered(ctx, config.athleteName.toUpperCase(), W / 2, H - 48, "600 10px 'JetBrains Mono', monospace", c.textDim);
+    }
     const totalRuns = cities.reduce((s, c) => s + c.count, 0);
     drawTextCentered(ctx, `${cities.length} cities · ${totalRuns} runs`, W / 2, H - 28, "400 11px 'JetBrains Mono', monospace", c.textDim);
     drawWatermark(ctx, W - 120, H - 28, c.textDim, 10);

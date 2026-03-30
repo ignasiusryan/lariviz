@@ -114,6 +114,9 @@ export const temperatureRanger: InsightTemplate = {
     drawTextCentered(ctx, `across ${withTemp.length} runs`, W / 2, 394, "400 11px 'JetBrains Mono', monospace", c.textDim);
 
     // Footer
+    if (config.athleteName) {
+      drawTextCentered(ctx, config.athleteName.toUpperCase(), W / 2, H - 44, "600 10px 'JetBrains Mono', monospace", c.textDim);
+    }
     drawWatermark(ctx, W / 2 - 30, H - 24, c.textDim, 10);
   },
 };

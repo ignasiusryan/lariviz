@@ -122,6 +122,9 @@ export const streakCounter: InsightTemplate = {
     }
 
     // Footer
+    if (config.athleteName) {
+      drawTextCentered(ctx, config.athleteName.toUpperCase(), W / 2, H - 44, "600 10px 'JetBrains Mono', monospace", c.textDim);
+    }
     drawWatermark(ctx, W / 2 - 30, H - 24, c.textDim, 10);
   },
 };

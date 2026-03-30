@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Activity } from "./Dashboard";
-import { templates } from "./stickers/registry";
+import { templates, largeTemplates } from "./stickers/registry";
 import type { InsightTemplate, InsightConfig, Shoe } from "./stickers/types";
 import { loadStickerFonts } from "./stickers/shared";
 
@@ -120,11 +120,14 @@ function InsightPreview({
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       renderScaled(previewRef.current, template, config, dpr);
     }
-    // Render download canvas at 3x for high-res export
+    // Render download canvas: 3x for small stickers, 1x for large formats (1080+)
     if (downloadRef.current) {
-      renderScaled(downloadRef.current, template, config, 3);
+      const downloadScale = template.width >= 1080 ? 1 : 3;
+      renderScaled(downloadRef.current, template, config, downloadScale);
     }
   }, [template, config]);
+
+  const [copied, setCopied] = useState(false);
 
   const handleDownload = () => {
     const canvas = downloadRef.current;
@@ -132,6 +135,52 @@ function InsightPreview({
     const link = document.createElement("a");
     link.download = `lariviz-${template.id}.png`;
     link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const handleCopy = async () => {
+    const canvas = downloadRef.current;
+    if (!canvas) return;
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) return;
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API not supported or permission denied
+    }
+  };
+
+  const handleDownloadStory = () => {
+    const canvas = downloadRef.current;
+    if (!canvas) return;
+    const storyW = 1080, storyH = 1920;
+    const storyCanvas = document.createElement("canvas");
+    storyCanvas.width = storyW;
+    storyCanvas.height = storyH;
+    const sCtx = storyCanvas.getContext("2d");
+    if (!sCtx) return;
+
+    // Gradient background
+    const grad = sCtx.createLinearGradient(0, 0, 0, storyH);
+    grad.addColorStop(0, "#1a1a2e");
+    grad.addColorStop(0.5, "#16213e");
+    grad.addColorStop(1, "#0f3460");
+    sCtx.fillStyle = grad;
+    sCtx.fillRect(0, 0, storyW, storyH);
+
+    // Center the sticker (scale 540→810 = 1.5x to look good on 1080 wide)
+    const stickerScale = 1.5;
+    const stickerW = template.width * stickerScale;
+    const stickerH = template.height * stickerScale;
+    const sx = (storyW - stickerW) / 2;
+    const sy = (storyH - stickerH) / 2;
+    sCtx.drawImage(canvas, sx, sy, stickerW, stickerH);
+
+    const link = document.createElement("a");
+    link.download = `lariviz-story-${template.id}.png`;
+    link.href = storyCanvas.toDataURL("image/png");
     link.click();
   };
 
@@ -154,7 +203,7 @@ function InsightPreview({
             width: "min(400px, 100%)",
             height: "auto",
             borderRadius: "12px",
-            aspectRatio: "1",
+            aspectRatio: `${template.width} / ${template.height}`,
           }}
         />
         {/* Hidden high-res canvas for download */}
@@ -164,23 +213,61 @@ function InsightPreview({
         <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
           {template.description}
         </div>
-        <button
-          onClick={handleDownload}
-          style={{
-            background: "var(--orange-5)",
-            color: "#000",
-            border: "none",
-            padding: "0.6rem 2rem",
-            borderRadius: "10px",
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.8rem",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "all 0.15s",
-          }}
-        >
-          Download PNG
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" }}>
+          <button
+            onClick={handleDownload}
+            style={{
+              background: "var(--orange-5)",
+              color: "#000",
+              border: "none",
+              padding: "0.6rem 1.5rem",
+              borderRadius: "10px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            Download PNG
+          </button>
+          <button
+            onClick={handleCopy}
+            style={{
+              background: copied ? "#4ADE80" : "var(--bg)",
+              color: copied ? "#000" : "var(--text)",
+              border: "1px solid var(--border)",
+              padding: "0.6rem 1.5rem",
+              borderRadius: "10px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+          {template.width <= 540 && (
+            <button
+              onClick={handleDownloadStory}
+              style={{
+                background: "var(--bg)",
+                color: "var(--text)",
+                border: "1px solid var(--border)",
+                padding: "0.6rem 1.5rem",
+                borderRadius: "10px",
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              Download as Story
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -196,7 +283,8 @@ export function StickerTab({ activities, athleteName, shoes }: Props) {
     loadStickerFonts().then(() => setFontsReady(true));
   }, []);
 
-  const currentTemplate = templates.find((t) => t.id === selectedTemplate) || templates[0];
+  const allTemplates = [...templates, ...largeTemplates];
+  const currentTemplate = allTemplates.find((t) => t.id === selectedTemplate) || templates[0];
 
   const config: InsightConfig = {
     activities,
@@ -262,6 +350,65 @@ export function StickerTab({ activities, athleteName, shoes }: Props) {
               onClick={() => setSelectedTemplate(t.id)}
               isClear={theme === "clear"}
             />
+          ))}
+        </div>
+      </div>
+
+      {/* Large format templates */}
+      <div>
+        <label style={sectionLabel}>Share Cards</label>
+        <div
+          className="sticker-gallery"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+            gap: "0.6rem",
+          }}
+        >
+          {largeTemplates.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setSelectedTemplate(t.id)}
+              className="sticker-thumb"
+              style={{
+                background: selectedTemplate === t.id ? "var(--orange-1)" : "var(--bg)",
+                border: selectedTemplate === t.id ? "2px solid var(--orange-4)" : "2px solid var(--border)",
+                borderRadius: "14px",
+                padding: "12px",
+                cursor: "pointer",
+                transition: "all 0.15s",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <div style={{
+                fontSize: "0.6rem",
+                fontFamily: "var(--font-mono)",
+                color: "var(--text-muted)",
+                background: "var(--border)",
+                padding: "2px 6px",
+                borderRadius: "4px",
+              }}>
+                {t.width}x{t.height}
+              </div>
+              <span
+                style={{
+                  fontSize: "0.68rem",
+                  fontFamily: "var(--font-mono)",
+                  color: selectedTemplate === t.id ? "var(--orange-5)" : "var(--text-muted)",
+                  fontWeight: selectedTemplate === t.id ? 600 : 400,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {t.name}
+              </span>
+              <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+                {t.description}
+              </span>
+            </button>
           ))}
         </div>
       </div>

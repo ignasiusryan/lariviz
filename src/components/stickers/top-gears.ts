@@ -99,6 +99,15 @@ export const topGears: InsightTemplate = {
     ctx.font = "400 11px 'JetBrains Mono', monospace";
     ctx.fillStyle = c.textDim;
     ctx.fillText(`${Math.round(totalKm).toLocaleString()} km total`, 40, H - 28);
+
+    if (config.athleteName) {
+      ctx.font = "600 10px 'JetBrains Mono', monospace";
+      ctx.fillStyle = c.textDim;
+      ctx.letterSpacing = "1px";
+      ctx.fillText(config.athleteName.toUpperCase(), 40, H - 46);
+      ctx.letterSpacing = "0px";
+    }
+
     drawWatermark(ctx, W - 120, H - 28, c.textDim, 10);
   },
 };
