@@ -13,6 +13,7 @@ export interface InsightConfig {
   theme: "dark" | "clear";
   athleteName: string;
   shoes: Shoe[];
+  selectedRunB?: Activity;
 }
 
 export interface InsightTemplate {

@@ -3,7 +3,7 @@ import { getColors, drawTextCentered, drawWatermark, fillRoundedRect, strokeRoun
 
 const W = 540, H = 540;
 
-interface Milestone {
+export interface Milestone {
   type: string;
   label: string;
   value: number;
@@ -28,7 +28,7 @@ const RACE_DISTANCES = [
   { label: "First Marathon", minDist: 42000, maxDist: 50000 },
 ];
 
-function detectMilestones(activities: InsightConfig["activities"]): Milestone[] {
+export function detectMilestones(activities: InsightConfig["activities"]): Milestone[] {
   const milestones: Milestone[] = [];
   const sorted = [...activities].sort((a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime());
 

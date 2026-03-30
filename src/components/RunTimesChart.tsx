@@ -170,7 +170,7 @@ export function RunTimesChart({ activities }: Props) {
       ctx.fillText("LARIVIZ", px, px + 10 * S);
 
       ctx.fillStyle = c.text;
-      ctx.font = `800 ${16 * S}px Outfit, sans-serif`;
+      ctx.font = `800 ${16 * S}px 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText("Run Times", px, px + 28 * S);
 
       // Clock
@@ -260,7 +260,7 @@ export function RunTimesChart({ activities }: Props) {
 
       // Center text
       ctx.fillStyle = c.text;
-      ctx.font = `800 ${20 * S}px Outfit, sans-serif`;
+      ctx.font = `800 ${20 * S}px 'Plus Jakarta Sans', sans-serif`;
       ctx.textAlign = "center";
       ctx.fillText(hourLabel(peakHour), clockCx, clockCy - 4 * S);
       ctx.fillStyle = c.textDim;
@@ -462,7 +462,7 @@ export function RunTimesChart({ activities }: Props) {
             fill="var(--text)"
             fontSize={22}
             fontWeight={800}
-            fontFamily="Outfit, sans-serif"
+            fontFamily="'Plus Jakarta Sans', sans-serif"
           >
             {hoveredHour !== null ? hourLabel(hoveredHour) : hourLabel(peakHour)}
           </text>

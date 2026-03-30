@@ -257,7 +257,7 @@ export function PaceChart({
       ctx.fillText("LARIVIZ", px, py + 10 * S);
 
       ctx.fillStyle = c.text;
-      ctx.font = `800 ${16 * S}px Outfit, sans-serif`;
+      ctx.font = `800 ${16 * S}px 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText("Pace vs Distance", px, py + 28 * S);
 
       // Chart area

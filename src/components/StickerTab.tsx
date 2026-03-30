@@ -278,6 +278,8 @@ export function StickerTab({ activities, athleteName, shoes }: Props) {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("top-gears");
   const [theme, setTheme] = useState<"dark" | "clear">("dark");
   const [fontsReady, setFontsReady] = useState(false);
+  const [selectedRunA, setSelectedRunA] = useState<Activity | null>(null);
+  const [selectedRunB, setSelectedRunB] = useState<Activity | null>(null);
 
   useEffect(() => {
     loadStickerFonts().then(() => setFontsReady(true));
@@ -286,11 +288,21 @@ export function StickerTab({ activities, athleteName, shoes }: Props) {
   const allTemplates = [...templates, ...largeTemplates];
   const currentTemplate = allTemplates.find((t) => t.id === selectedTemplate) || templates[0];
 
+  const runsWithPolyline = activities.filter(
+    (a) => a.map?.summary_polyline && a.map.summary_polyline.length > 0
+  );
+
+  const effectiveActivities =
+    currentTemplate.id === "run-comparison" && selectedRunA
+      ? [selectedRunA, ...activities.filter((a) => a.id !== selectedRunA.id)]
+      : activities;
+
   const config: InsightConfig = {
-    activities,
+    activities: effectiveActivities,
     theme,
     athleteName,
     shoes,
+    selectedRunB: selectedRunB || undefined,
   };
 
   if (!fontsReady) {
@@ -326,6 +338,128 @@ export function StickerTab({ activities, athleteName, shoes }: Props) {
           </button>
         ))}
       </div>
+
+      {/* Run comparison picker */}
+      {currentTemplate.id === "run-comparison" && (
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          {/* Run A picker */}
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.65rem",
+                fontFamily: "var(--font-mono)",
+                color: "#ff8c00",
+                marginBottom: "0.35rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Run A
+            </label>
+            <div
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+              }}
+            >
+              {runsWithPolyline.map((a) => (
+                <button
+                  key={`a-${a.id}`}
+                  onClick={() => setSelectedRunA(a)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "0.45rem 0.6rem",
+                    background: selectedRunA?.id === a.id ? "rgba(255,140,0,0.1)" : "transparent",
+                    border: "none",
+                    borderBottom: "1px solid var(--border)",
+                    borderLeft: selectedRunA?.id === a.id ? "3px solid #ff8c00" : "3px solid transparent",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  <div style={{ fontSize: "0.72rem", color: "var(--text)", fontWeight: 500 }}>
+                    {a.name}
+                  </div>
+                  <div style={{ fontSize: "0.6rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                    {new Date(a.start_date_local).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {" \u00b7 "}
+                    {(a.distance / 1000).toFixed(1)} km
+                  </div>
+                </button>
+              ))}
+              {runsWithPolyline.length === 0 && (
+                <div style={{ padding: "1rem", fontSize: "0.7rem", color: "var(--text-muted)", textAlign: "center" }}>
+                  No runs with routes
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Run B picker */}
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.65rem",
+                fontFamily: "var(--font-mono)",
+                color: "#2dd4bf",
+                marginBottom: "0.35rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Run B
+            </label>
+            <div
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+              }}
+            >
+              {runsWithPolyline.map((a) => (
+                <button
+                  key={`b-${a.id}`}
+                  onClick={() => setSelectedRunB(a)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "0.45rem 0.6rem",
+                    background: selectedRunB?.id === a.id ? "rgba(45,212,191,0.1)" : "transparent",
+                    border: "none",
+                    borderBottom: "1px solid var(--border)",
+                    borderLeft: selectedRunB?.id === a.id ? "3px solid #2dd4bf" : "3px solid transparent",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  <div style={{ fontSize: "0.72rem", color: "var(--text)", fontWeight: 500 }}>
+                    {a.name}
+                  </div>
+                  <div style={{ fontSize: "0.6rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                    {new Date(a.start_date_local).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {" \u00b7 "}
+                    {(a.distance / 1000).toFixed(1)} km
+                  </div>
+                </button>
+              ))}
+              {runsWithPolyline.length === 0 && (
+                <div style={{ padding: "1rem", fontSize: "0.7rem", color: "var(--text-muted)", textAlign: "center" }}>
+                  No runs with routes
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Preview */}
       <InsightPreview template={currentTemplate} config={config} isClear={theme === "clear"} />

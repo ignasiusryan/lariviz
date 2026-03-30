@@ -1,5 +1,5 @@
 import type { InsightTemplate, InsightConfig } from "./types";
-import { getColors, drawRouteGlow, drawTextCentered, drawWatermark } from "./shared";
+import { getColors, drawRouteGlow, drawTextCentered, drawWatermark, fillRoundedRect } from "./shared";
 import { decodePolyline } from "@/lib/polyline";
 import { formatPace, formatNumber } from "@/lib/format";
 
@@ -65,12 +65,13 @@ export const raceRecap: InsightTemplate = {
     const points = decodePolyline(run.map!.summary_polyline!);
 
     // Hero route with glow
-    const routeSize = 520;
+    const routeSize = 440;
     const routeX = (W - routeSize) / 2;
-    const routeY = 60;
+    const routeY = 80;
     drawRouteGlow(ctx, points, routeX, routeY, routeSize, c.accent, 4);
 
     // Run name as headline
+    const nameY = routeY + routeSize + 40;
     const name = run.name.toUpperCase();
     ctx.font = "700 48px 'Plus Jakarta Sans', sans-serif";
     ctx.fillStyle = c.text;
@@ -81,18 +82,20 @@ export const raceRecap: InsightTemplate = {
       ctx.font = `700 ${Math.floor(48 * scale)}px 'Plus Jakarta Sans', sans-serif`;
     }
     nameW = ctx.measureText(name).width;
-    ctx.fillText(name, (W - nameW) / 2, 640);
+    ctx.fillText(name, (W - nameW) / 2, nameY);
     ctx.letterSpacing = "0px";
 
     // Accent line
+    const accentLineY = nameY + 20;
     ctx.strokeStyle = c.accent;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(W / 2 - 50, 660);
-    ctx.lineTo(W / 2 + 50, 660);
+    ctx.moveTo(W / 2 - 50, accentLineY);
+    ctx.lineTo(W / 2 + 50, accentLineY);
     ctx.stroke();
 
     // Date + location + athlete name
+    const metaLineY = nameY + 56;
     const date = new Date(run.start_date_local).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }).toUpperCase();
     const location = getLocation(run);
     const metaParts = [date];
@@ -105,13 +108,21 @@ export const raceRecap: InsightTemplate = {
     ctx.letterSpacing = "3px";
     const metaW = ctx.measureText(metaLine).width;
     if (metaW > W - 100) {
-      const scale = (W - 100) / metaW;
-      ctx.font = `500 ${Math.floor(18 * scale)}px 'Plus Jakarta Sans', sans-serif`;
+      // Split into two lines: "DATE · LOCATION" on line 1, "ATHLETE" on line 2
+      const dateLoc = [date];
+      if (location) dateLoc.push(location.toUpperCase());
+      const line1 = dateLoc.join("  ·  ");
+      ctx.font = "500 18px 'Plus Jakarta Sans', sans-serif";
+      drawTextCentered(ctx, line1, W / 2, metaLineY, ctx.font, c.textMuted);
+      if (config.athleteName) {
+        drawTextCentered(ctx, config.athleteName.toUpperCase(), W / 2, metaLineY + 24, ctx.font, c.textMuted);
+      }
+    } else {
+      drawTextCentered(ctx, metaLine, W / 2, metaLineY, ctx.font, c.textMuted);
     }
-    drawTextCentered(ctx, metaLine, W / 2, 696, ctx.font, c.textMuted);
     ctx.letterSpacing = "0px";
 
-    // Stats row
+    // Stats as 2x2 card grid
     const distKm = run.distance / 1000;
     const paceMin = distKm > 0 ? run.moving_time / 60 / distKm : 0;
     const elev = run.total_elevation_gain || 0;
@@ -123,31 +134,44 @@ export const raceRecap: InsightTemplate = {
       { label: "ELEVATION", value: `${Math.round(elev)} m` },
     ];
 
-    const statsY = 810;
-    const statColW = (W - 120) / stats.length;
-    for (let i = 0; i < stats.length; i++) {
-      const sx = 60 + statColW * i + statColW / 2;
+    const gridGap = 16;
+    const gridPadX = 60;
+    const cardW = (W - gridPadX * 2 - gridGap) / 2;
+    const cardH = 80;
+    const gridTop = metaLineY + 40;
+    const cardFill = config.theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)";
 
+    // Divider above stats
+    ctx.fillStyle = c.border;
+    ctx.fillRect(gridPadX, gridTop - 16, W - gridPadX * 2, 1);
+
+    for (let i = 0; i < stats.length; i++) {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const cx = gridPadX + col * (cardW + gridGap);
+      const cy = gridTop + row * (cardH + gridGap);
+
+      fillRoundedRect(ctx, cx, cy, cardW, cardH, 12, cardFill);
+
+      // Value centered in card
       ctx.font = "600 42px 'Plus Jakarta Sans', sans-serif";
       ctx.fillStyle = c.text;
       const vw = ctx.measureText(stats[i].value).width;
-      ctx.fillText(stats[i].value, sx - vw / 2, statsY);
+      ctx.fillText(stats[i].value, cx + (cardW - vw) / 2, cy + 42);
 
+      // Label below value
       ctx.font = "400 14px 'JetBrains Mono', Menlo, monospace";
       ctx.fillStyle = c.textMuted;
       ctx.letterSpacing = "3px";
       const lw = ctx.measureText(stats[i].label).width;
-      ctx.fillText(stats[i].label, sx - lw / 2, statsY + 28);
+      ctx.fillText(stats[i].label, cx + (cardW - lw) / 2, cy + 64);
       ctx.letterSpacing = "0px";
     }
 
-    // Divider above stats
-    ctx.fillStyle = c.border;
-    ctx.fillRect(60, 750, W - 120, 1);
-
     // Divider below stats
+    const gridBottom = gridTop + 2 * cardH + gridGap + 16;
     ctx.fillStyle = c.border;
-    ctx.fillRect(60, 870, W - 120, 1);
+    ctx.fillRect(gridPadX, gridBottom, W - gridPadX * 2, 1);
 
     // Footer
     ctx.font = "400 14px 'JetBrains Mono', Menlo, monospace";

@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useRunData } from "@/components/providers/RunDataProvider";
 import { YearSelector } from "@/components/YearSelector";
 import { StatsRow } from "@/components/StatsRow";
-import { RecentRuns } from "@/components/RecentRuns";
 import { StravaAttribution } from "@/components/StravaAttribution";
 
 export function DashboardContent({ children }: { children: ReactNode }) {
@@ -38,9 +37,6 @@ export function DashboardContent({ children }: { children: ReactNode }) {
 
       {/* Page content */}
       {children}
-
-      {/* Recent Runs */}
-      <RecentRuns activities={filteredActivities} />
 
       {/* Attribution */}
       <div

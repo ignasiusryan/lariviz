@@ -68,10 +68,10 @@ export function DownloadFacetsButton({ activities, athleteName }: Props) {
       ctx.fillText("LARIVIZ", ox, oy + 10 * S);
 
       ctx.fillStyle = c.text;
-      ctx.font = `800 ${18 * S}px Outfit, sans-serif`;
+      ctx.font = `800 ${18 * S}px 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText("Route Facets", ox, oy + 30 * S);
 
-      ctx.font = `700 ${14 * S}px Outfit, sans-serif`;
+      ctx.font = `700 ${14 * S}px 'Plus Jakarta Sans', sans-serif`;
       const nameW = ctx.measureText(athleteName).width;
       ctx.fillText(athleteName, totalW - padX - nameW, oy + 30 * S);
 

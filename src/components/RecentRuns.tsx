@@ -7,6 +7,7 @@ import type { Activity } from "@/components/types";
 
 interface Props {
   activities: Activity[];
+  limit?: number;
 }
 
 const THUMB_SIZE = 36;
@@ -75,14 +76,14 @@ function getLocation(activity: Activity): string | null {
   return null;
 }
 
-export function RecentRuns({ activities }: Props) {
+export function RecentRuns({ activities, limit = 8 }: Props) {
   const runs = [...activities]
     .sort(
       (a, b) =>
         new Date(b.start_date_local).getTime() -
         new Date(a.start_date_local).getTime()
     )
-    .slice(0, 8);
+    .slice(0, limit);
 
   return (
     <div

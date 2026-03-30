@@ -9,6 +9,7 @@ const navItems = [
   { href: "/dashboard/insights", label: "Insights" },
   { href: "/dashboard/times", label: "Run Times" },
   { href: "/dashboard/records", label: "Records" },
+  { href: "/dashboard/runs", label: "Runs" },
 ];
 
 const createItems = [

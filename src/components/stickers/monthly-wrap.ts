@@ -93,8 +93,8 @@ export const monthlyWrap: InsightTemplate = {
     curY += 28;
     drawTextCentered(ctx, "KILOMETERS", W / 2, curY, "500 22px 'JetBrains Mono', monospace", c.textMuted);
 
-    // Supporting stats row
-    curY += 80;
+    // Supporting stats row — card boxes
+    curY += 60;
     const supportStats = [
       { label: "RUNS", value: `${monthRuns.length}` },
       { label: "TIME", value: `${Math.round(totalTime / 3600)}h ${Math.round((totalTime % 3600) / 60)}m` },
@@ -102,21 +102,29 @@ export const monthlyWrap: InsightTemplate = {
       { label: "ELEVATION", value: `${Math.round(totalElev)}m` },
     ];
 
-    const statColW = (W - 120) / supportStats.length;
+    const cardGap = 16;
+    const cardW = (W - 120 - 3 * cardGap) / 4;
+    const cardH = 80;
+    const cardFill = config.theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)";
     for (let i = 0; i < supportStats.length; i++) {
-      const sx = 60 + statColW * i + statColW / 2;
+      const cx = 60 + i * (cardW + cardGap);
+      fillRoundedRect(ctx, cx, curY, cardW, cardH, 12, cardFill);
+
+      // Value centered inside card
       ctx.font = "600 36px 'Plus Jakarta Sans', sans-serif";
       ctx.fillStyle = c.text;
       const vw = ctx.measureText(supportStats[i].value).width;
-      ctx.fillText(supportStats[i].value, sx - vw / 2, curY);
+      ctx.fillText(supportStats[i].value, cx + cardW / 2 - vw / 2, curY + cardH / 2 + 6);
 
-      ctx.font = "400 12px 'JetBrains Mono', Menlo, monospace";
+      // Label below card
+      ctx.font = "400 12px 'JetBrains Mono', monospace";
       ctx.fillStyle = c.textDim;
       ctx.letterSpacing = "2px";
       const lw = ctx.measureText(supportStats[i].label).width;
-      ctx.fillText(supportStats[i].label, sx - lw / 2, curY + 24);
+      ctx.fillText(supportStats[i].label, cx + cardW / 2 - lw / 2, curY + cardH + 20);
       ctx.letterSpacing = "0px";
     }
+    curY += cardH + 20;
 
     // Mini calendar heatmap
     curY += 80;
@@ -126,9 +134,13 @@ export const monthlyWrap: InsightTemplate = {
     const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
     const firstDow = new Date(targetYear, targetMonth, 1).getDay(); // 0=Sun
     const runDays = new Set<number>();
+    const dayKmMap = new Map<number, number>();
     for (const a of monthRuns) {
-      runDays.add(new Date(a.start_date_local).getDate());
+      const dayNum = new Date(a.start_date_local).getDate();
+      runDays.add(dayNum);
+      dayKmMap.set(dayNum, (dayKmMap.get(dayNum) || 0) + a.distance / 1000);
     }
+    const maxDayKm = Math.max(...Array.from(dayKmMap.values()), 0.001);
 
     const cellSize = 48;
     const cellGap = 8;
@@ -152,7 +164,10 @@ export const monthlyWrap: InsightTemplate = {
       const cy = curY + row * (cellSize + cellGap);
 
       const hasRun = runDays.has(day);
-      fillRoundedRect(ctx, cx, cy, cellSize, cellSize, 8, hasRun ? c.accentDim : (config.theme === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"));
+      const dim = config.theme === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)";
+      const dayKm = dayKmMap.get(day) || 0;
+      const cellFill = hasRun ? `rgba(255, 140, 0, ${0.1 + (dayKm / maxDayKm) * 0.5})` : dim;
+      fillRoundedRect(ctx, cx, cy, cellSize, cellSize, 8, cellFill);
 
       if (hasRun) {
         ctx.strokeStyle = c.accent;
@@ -175,19 +190,26 @@ export const monthlyWrap: InsightTemplate = {
       drawTextCentered(ctx, "HIGHLIGHT RUN", W / 2, curY, "500 14px 'JetBrains Mono', monospace", c.textDim);
       curY += 16;
 
-      const points = decodePolyline(longestRun.map.summary_polyline);
-      const routeSize = 260;
-      const routeX = (W - routeSize) / 2;
-      drawRouteGlow(ctx, points, routeX, curY, routeSize, c.accent, 3);
-      curY += routeSize + 10;
+      const hlPad = 24;
+      const routeSize = 300;
+      const hlCardW = W - 120;
+      const hlCardX = (W - hlCardW) / 2;
+      const hlCardH = routeSize + 80 + hlPad * 2;
+      const hlCardFill = config.theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)";
+      fillRoundedRect(ctx, hlCardX, curY, hlCardW, hlCardH, 12, hlCardFill);
 
-      drawTextCentered(ctx, longestRun.name, W / 2, curY, "600 22px 'Plus Jakarta Sans', sans-serif", c.text);
-      curY += 26;
+      const points = decodePolyline(longestRun.map.summary_polyline);
+      const routeX = (W - routeSize) / 2;
+      drawRouteGlow(ctx, points, routeX, curY + hlPad, routeSize, c.accent, 3);
+      const textY = curY + hlPad + routeSize + 10;
+
+      drawTextCentered(ctx, longestRun.name, W / 2, textY, "600 22px 'Plus Jakarta Sans', sans-serif", c.text);
 
       const km = (longestRun.distance / 1000).toFixed(1);
       const pace = longestRun.moving_time / 60 / (longestRun.distance / 1000);
-      drawTextCentered(ctx, `${km} km · ${formatPace(pace)} /km`, W / 2, curY, "400 16px 'JetBrains Mono', monospace", c.textMuted);
-      curY += 40;
+      drawTextCentered(ctx, `${km} km · ${formatPace(pace)} /km`, W / 2, textY + 26, "400 16px 'JetBrains Mono', monospace", c.textMuted);
+
+      curY += hlCardH + 20;
     }
 
     // Month-over-month comparison
@@ -202,9 +224,40 @@ export const monthlyWrap: InsightTemplate = {
           targetMonth === 0 ? 11 : targetMonth - 1,
           1
         ).toLocaleString("en-US", { month: "short" });
+        const curMonthShort = new Date(targetYear, targetMonth, 1).toLocaleString("en-US", { month: "short" });
 
         const color = change >= 0 ? "#4ADE80" : "#f87171";
         drawTextCentered(ctx, `${changeText} vs ${prevMonthName}`, W / 2, curY, "600 20px 'JetBrains Mono', monospace", color);
+        curY += 36;
+
+        // Comparison bars
+        const barMaxW = W - 200;
+        const barH = 16;
+        const barR = 8;
+        const barX = 140;
+        const maxKm = Math.max(prevKm, totalKm);
+
+        // Previous month bar
+        const prevBarW = Math.max(barR * 2, (prevKm / maxKm) * barMaxW);
+        ctx.font = "500 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = c.textDim;
+        ctx.fillText(prevMonthName.toUpperCase(), 60, curY + barH / 2 + 5);
+        fillRoundedRect(ctx, barX, curY, prevBarW, barH, barR, c.textDim);
+        ctx.font = "500 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = c.textMuted;
+        ctx.fillText(`${Math.round(prevKm)} km`, barX + prevBarW + 10, curY + barH / 2 + 5);
+        curY += barH + 12;
+
+        // Current month bar
+        const curBarW = Math.max(barR * 2, (totalKm / maxKm) * barMaxW);
+        ctx.font = "500 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = c.textDim;
+        ctx.fillText(curMonthShort.toUpperCase(), 60, curY + barH / 2 + 5);
+        fillRoundedRect(ctx, barX, curY, curBarW, barH, barR, c.accent);
+        ctx.font = "500 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = c.text;
+        ctx.fillText(`${Math.round(totalKm)} km`, barX + curBarW + 10, curY + barH / 2 + 5);
+        curY += barH + 20;
       }
     }
 
