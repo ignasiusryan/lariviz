@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useTheme } from "./ThemeProvider";
 import { DARK, LIGHT, downloadCanvas, downloadBtnStyle } from "@/lib/download-theme";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 
 interface Props {
   activities: Activity[];

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   const encrypted = encrypt(JSON.stringify(session));
 
   // Use HTML redirect so the Set-Cookie header is properly processed
-  const html = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/"></head><body>Redirecting...</body></html>`;
+  const html = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/dashboard"></head><body>Redirecting...</body></html>`;
   const response = new NextResponse(html, {
     status: 200,
     headers: { "Content-Type": "text/html" },

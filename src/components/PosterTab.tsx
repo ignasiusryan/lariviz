@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 import { PosterMap } from "./poster/PosterMap";
 import { PalettePicker } from "./poster/PalettePicker";
 import { getPalette, type PosterPalette } from "@/data/poster-palettes";

@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDuration, formatPace, formatNumber } from "@/lib/format";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 
 interface Props {
   activities: Activity[];

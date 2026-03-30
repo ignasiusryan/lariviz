@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { decodePolyline, normalizePoints } from "@/lib/polyline";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 
 interface Props {
   activities: Activity[];

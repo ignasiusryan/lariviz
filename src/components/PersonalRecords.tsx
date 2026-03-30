@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { formatDuration, formatPace, formatNumber } from "@/lib/format";
 import { decodePolyline, normalizePoints } from "@/lib/polyline";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 
 interface Props {
   activities: Activity[];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 import { templates, largeTemplates } from "./stickers/registry";
 import type { InsightTemplate, InsightConfig, Shoe } from "./stickers/types";
 import { loadStickerFonts } from "./stickers/shared";

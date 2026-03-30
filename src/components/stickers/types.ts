@@ -1,4 +1,4 @@
-import type { Activity } from "../Dashboard";
+import type { Activity } from "@/components/types";
 
 export interface Shoe {
   id: string;

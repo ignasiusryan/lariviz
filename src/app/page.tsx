@@ -1,13 +1,13 @@
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
-import { LoginCard } from "@/components/LoginCard";
-import { Dashboard } from "@/components/Dashboard";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 export default async function Home() {
   const session = await getSession();
 
-  if (!session) {
-    return <LoginCard />;
+  if (session) {
+    redirect("/dashboard");
   }
 
-  return <Dashboard athleteName={session.athlete_name} />;
+  return <LandingPage />;
 }

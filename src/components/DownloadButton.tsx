@@ -5,7 +5,7 @@ import { useTheme } from "./ThemeProvider";
 import type { HeatmapData } from "@/lib/heatmap";
 import { formatDuration, formatPace, formatNumber } from "@/lib/format";
 import { DARK, LIGHT, getLevelColor, downloadCanvas, downloadBtnStyle } from "@/lib/download-theme";
-import type { Activity } from "./Dashboard";
+import type { Activity } from "@/components/types";
 
 interface Props {
   heatmapData: HeatmapData;
