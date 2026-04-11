@@ -67,18 +67,11 @@ export function LandingPage() {
       {/* Header */}
       <header className="landing-header">
         <div className="landing-header-inner">
-          <div
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--orange-5)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            LARIVIZ
-          </div>
+          <img
+            src="/landing/lariviz-logo.png"
+            alt="Lariviz"
+            style={{ height: 56, width: "auto", display: "block" }}
+          />
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
             <ThemeToggle />
             <ConnectStravaButton size="small" />
