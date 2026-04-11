@@ -11,6 +11,7 @@ const features = [
     description:
       "Beautiful GitHub-style heatmaps that show your running streak, daily distance, and year-over-year progress.",
     aspect: "16/9",
+    image: "/landing/heatmaps.png",
   },
   {
     title: "Route Facets",
@@ -18,6 +19,7 @@ const features = [
     description:
       "Every route rendered as a mini-map. See the shape of your favorite loops, trails, and races side by side.",
     aspect: "16/9",
+    image: "/landing/routes.png",
   },
   {
     title: "Pace Insights",
@@ -25,6 +27,7 @@ const features = [
     description:
       "Scatter plots of pace vs distance, with trend lines and year-over-year comparison to track your progress.",
     aspect: "16/9",
+    image: "/landing/insights.png",
   },
   {
     title: "Stickers & Share Cards",
@@ -32,6 +35,7 @@ const features = [
     description:
       "Generate race recaps, streak counters, monthly wraps, and more — ready to share on social media.",
     aspect: "1",
+    image: "/landing/stickers.png",
   },
   {
     title: "Map Posters",
@@ -39,6 +43,7 @@ const features = [
     description:
       "Select any run and render it as a clean, minimalist poster with your stats and route overlaid on a map.",
     aspect: "3/4",
+    image: "/landing/poster.png",
   },
   {
     title: "Personal Records",
@@ -46,6 +51,7 @@ const features = [
     description:
       "Track your PRs at every distance — from 1K to marathon — with dates, times, and pace breakdowns.",
     aspect: "16/9",
+    image: "/landing/records.png",
   },
 ];
 
@@ -94,9 +100,12 @@ export function LandingPage() {
             <ConnectStravaButton size="large" />
           </div>
           <div className="landing-hero-visual">
-            <div className="landing-placeholder" style={{ aspectRatio: "16/9" }}>
-              <span>Heatmap Preview</span>
-            </div>
+            <img
+              src="/landing/hero.png"
+              alt="Lariviz heatmap dashboard preview"
+              className="landing-image"
+              style={{ aspectRatio: "16/9" }}
+            />
           </div>
         </div>
       </section>
@@ -114,12 +123,12 @@ export function LandingPage() {
               <p className="landing-feature-desc">{feat.description}</p>
             </div>
             <div className="landing-feature-visual">
-              <div
-                className="landing-placeholder"
+              <img
+                src={feat.image}
+                alt={`${feat.title} preview`}
+                className="landing-image"
                 style={{ aspectRatio: feat.aspect }}
-              >
-                <span>{feat.title}</span>
-              </div>
+              />
             </div>
           </div>
         ))}
