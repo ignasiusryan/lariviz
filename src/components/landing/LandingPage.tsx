@@ -84,7 +84,7 @@ export function LandingPage() {
         <div className="landing-hero-inner">
           <div className="landing-hero-text">
             <h1 className="landing-hero-title">
-              Visualize every mile.
+              Visualize every KM.
             </h1>
             <p className="landing-hero-subtitle">
               Turn your Strava data into stunning heatmaps, route art, pace
