@@ -2,6 +2,7 @@
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StravaAttribution } from "@/components/StravaAttribution";
+import { ConnectStravaButton } from "@/components/ConnectStravaButton";
 
 const features = [
   {
@@ -74,9 +75,7 @@ export function LandingPage() {
           </div>
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
             <ThemeToggle />
-            <a href="/api/auth/login" className="landing-cta-small">
-              Connect with Strava
-            </a>
+            <ConnectStravaButton size="small" />
           </div>
         </div>
       </header>
@@ -92,9 +91,7 @@ export function LandingPage() {
               Turn your Strava data into stunning heatmaps, route art, pace
               insights, and shareable stickers.
             </p>
-            <a href="/api/auth/login" className="landing-cta-big">
-              Connect with Strava
-            </a>
+            <ConnectStravaButton size="large" />
           </div>
           <div className="landing-hero-visual">
             <div className="landing-placeholder" style={{ aspectRatio: "16/9" }}>
@@ -145,9 +142,7 @@ export function LandingPage() {
       {/* Final CTA */}
       <section className="landing-final-cta">
         <h2 className="landing-section-title">Ready to visualize your runs?</h2>
-        <a href="/api/auth/login" className="landing-cta-big">
-          Connect with Strava
-        </a>
+        <ConnectStravaButton size="large" />
         <p
           style={{
             fontSize: "0.8rem",

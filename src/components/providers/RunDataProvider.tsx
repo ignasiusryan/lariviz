@@ -80,6 +80,16 @@ export function RunDataProvider({ athleteName, children }: Props) {
         const data: Activity[] = await activitiesRes.json();
         setActivities(data);
 
+        // If the user has no runs in the past 365 days but does have older
+        // runs, default to "All Years" so they don't land on empty charts.
+        const cutoff = Date.now() - 365 * 24 * 60 * 60 * 1000;
+        const hasRecentRun = data.some(
+          (a) => new Date(a.start_date_local).getTime() >= cutoff
+        );
+        if (!hasRecentRun && data.length > 0) {
+          setMode({ type: "all" });
+        }
+
         if (athleteRes.ok) {
           const athlete = await athleteRes.json();
           if (Array.isArray(athlete.shoes)) {
